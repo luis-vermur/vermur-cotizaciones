@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(php -r ' *)",
+      "WebFetch(domain:webcache.googleusercontent.com)",
+      "Bash(curl -s \"https://www.vermur.com\")",
+      "Bash(curl -s \"https://www.vermur.com/style.css\")",
+      "Bash(php *)",
+      "Bash(npm run *)"
+    ]
+  }
+}
