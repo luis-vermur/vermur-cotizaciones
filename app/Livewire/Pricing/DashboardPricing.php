@@ -3,13 +3,19 @@
 namespace App\Livewire\Pricing;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Solicitud;
 use App\Models\User;
 
 class DashboardPricing extends Component
 {
-    public string $filtroEstado = '';
-    public string $filtroAsignado = '';
+    use WithPagination;
+
+    public string $filtroEstado    = '';
+    public string $filtroAsignado  = '';
+
+    public function updatedFiltroEstado()   { $this->resetPage(); }
+    public function updatedFiltroAsignado() { $this->resetPage(); }
 
     public function render()
     {
@@ -18,7 +24,6 @@ class DashboardPricing extends Component
         $query = Solicitud::with(['cliente', 'asignadoA', 'cotizaciones'])
             ->orderBy('created_at', 'desc');
 
-        // Filtro de visibilidad según rol
         if ($user->rol === 'pricing') {
             $query->where(function ($q) use ($user) {
                 $q->where('asignado_a', $user->id)
@@ -34,22 +39,21 @@ class DashboardPricing extends Component
             $query->where('asignado_a', $this->filtroAsignado);
         }
 
-        $solicitudes  = $query->get();
+        $solicitudes   = $query->paginate(25);
         $equipoPricing = User::where('rol', 'pricing')->where('activo', true)->get();
 
-        // Stats sin filtros aplicados
-        $statsQuery = Solicitud::query();
-        if ($user->rol === 'pricing') {
-            $statsQuery->where(function ($q) use ($user) {
+        $rows = Solicitud::selectRaw('estado, COUNT(*) as total')
+            ->when($user->rol === 'pricing', fn($q) => $q->where(function ($q) use ($user) {
                 $q->where('asignado_a', $user->id)->orWhereNull('asignado_a');
-            });
-        }
-        $todas = $statsQuery->get();
+            }))
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
         $stats = [
-            'nueva'       => $todas->where('estado', 'nueva')->count(),
-            'en_revision' => $todas->where('estado', 'en_revision')->count(),
-            'cotizada'    => $todas->where('estado', 'cotizada')->count(),
-            'enviada'     => $todas->where('estado', 'enviada')->count(),
+            'nueva'       => (int) ($rows['nueva'] ?? 0),
+            'en_revision' => (int) ($rows['en_revision'] ?? 0),
+            'cotizada'    => (int) ($rows['cotizada'] ?? 0),
+            'enviada'     => (int) ($rows['enviada'] ?? 0),
         ];
 
         return view('livewire.pricing.dashboard-pricing', compact('solicitudes', 'equipoPricing', 'stats'))

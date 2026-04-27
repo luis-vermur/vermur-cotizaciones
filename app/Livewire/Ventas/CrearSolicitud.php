@@ -6,6 +6,8 @@ use Livewire\Component;
 use App\Models\Solicitud;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Models\Adjunto;
+use App\Models\Pallet;
 use App\Models\HistorialEstado;
 use App\Services\CotizacionCalculator;
 use Livewire\WithFileUploads;
@@ -90,8 +92,10 @@ class CrearSolicitud extends Component
             'tipo_operacion'  => 'required|string',
             'tipo_transporte' => 'required|string',
             'tipo_mercancia'  => 'required|string',
-            'nuevoClienteNombre' => 'nullable|string|min:2',
-            'nuevoClienteDias'   => 'nullable|integer|min:0',
+            'nuevoClienteNombre'  => 'nullable|string|min:2',
+            'nuevoClienteDias'    => 'nullable|integer|min:0',
+            'archivos_fcl.*'  => 'file|mimes:pdf,jpg,jpeg,png,webp,xlsx,docx|max:10240',
+            'archivos_lcl.*'  => 'file|mimes:pdf,jpg,jpeg,png,webp,xlsx,docx|max:10240',
         ];
     }
 
@@ -118,12 +122,8 @@ class CrearSolicitud extends Component
     {
         $this->validate();
 
-        $ultimo = Solicitud::orderBy('id', 'desc')->first();
-        $num    = $ultimo ? ($ultimo->id + 1) : 1;
-        $folio  = CotizacionCalculator::generarFolio($num);
-
         $solicitud = Solicitud::create([
-            'folio'             => $folio,
+            'folio'             => 'TMP-' . uniqid(),
             'cliente_id'        => $this->cliente_id ?: null,
             'cliente_nombre'    => $this->cliente_nombre,
             'dias_credito'      => $this->dias_credito,
@@ -164,6 +164,9 @@ class CrearSolicitud extends Component
             'estado'            => 'nueva',
         ]);
 
+        $folio = CotizacionCalculator::generarFolio($solicitud->id);
+        $solicitud->update(['folio' => $folio]);
+
         HistorialEstado::create([
             'solicitud_id'    => $solicitud->id,
             'estado_anterior' => null,
@@ -177,7 +180,7 @@ class CrearSolicitud extends Component
         // Guardar adjuntos FCL
         foreach ($this->archivos_fcl as $archivo) {
             $ruta = $archivo->store('adjuntos', 'public');
-            \App\Models\Adjunto::create([
+            Adjunto::create([
                 'solicitud_id'   => $solicitud->id,
                 'nombre_archivo' => $archivo->getClientOriginalName(),
                 'ruta'           => $ruta,
@@ -188,7 +191,7 @@ class CrearSolicitud extends Component
         // Guardar adjuntos LCL
         foreach ($this->archivos_lcl as $archivo) {
             $ruta = $archivo->store('adjuntos', 'public');
-            \App\Models\Adjunto::create([
+            Adjunto::create([
                 'solicitud_id'   => $solicitud->id,
                 'nombre_archivo' => $archivo->getClientOriginalName(),
                 'ruta'           => $ruta,
@@ -198,7 +201,7 @@ class CrearSolicitud extends Component
 
         // Guardar pallets
         foreach ($this->pallets as $pallet) {
-            \App\Models\Pallet::create([
+            Pallet::create([
                 'solicitud_id' => $solicitud->id,
                 'numero'       => $pallet['numero'],
                 'largo_cm'     => $pallet['largo_cm'] ?: null,

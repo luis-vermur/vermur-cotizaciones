@@ -200,63 +200,65 @@
     {{-- Chat --}}
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 border-b">
-            <h2 class="font-semibold text-gray-700">Mensajes</h2>
-            @php $sinLeer = $solicitud->comentarios->where('rol','pricing')->count(); @endphp
-            @if($sinLeer > 0)
+            <h2 class="font-semibold text-gray-700">Mensajes con Pricing</h2>
+            @php $dePricing = $solicitud->comentarios->where('rol','pricing')->count(); @endphp
+            @if($dePricing > 0)
             <span class="text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background:#3d2372;">
-                {{ $sinLeer }} de Pricing
+                {{ $dePricing }} de Pricing
             </span>
             @endif
         </div>
 
-        {{-- Mensajes --}}
-        <div class="px-4 py-3 flex flex-col gap-2" style="max-height:280px; overflow-y:auto;" id="chatScroll">
+        {{-- Lista de mensajes --}}
+        <div id="chatScrollV" style="max-height:320px; overflow-y:auto; padding:.75rem 1rem; display:flex; flex-direction:column; gap:.5rem;">
             @forelse($solicitud->comentarios->sortBy('created_at') as $com)
-            <div class="flex flex-col {{ $com->rol === 'ventas' ? 'items-end' : 'items-start' }}">
-                <div class="max-w-xs px-3 py-2 rounded-xl text-sm"
-                     style="background:{{ $com->rol === 'ventas' ? '#ede9fe' : '#fff' }};
-                            border:1px solid {{ $com->rol === 'ventas' ? 'rgba(61,35,114,0.15)' : 'rgba(61,35,114,0.12)' }};
-                            {{ $com->resuelto ? 'opacity:.6;' : '' }}">
-                    <p class="text-gray-800" style="{{ $com->resuelto ? 'text-decoration:line-through;' : '' }}">
-                        {{ $com->texto }}
-                    </p>
-                    <p class="text-xs mt-1" style="color:#9490b0;">
-                        {{ $com->user->name }} · {{ $com->created_at->format('d/m H:i') }}
+            @php $mio = $com->rol === 'ventas'; @endphp
+            <div wire:key="vchat-{{ $com->id }}"
+                 style="display:flex; flex-direction:column; align-items:{{ $mio ? 'flex-end' : 'flex-start' }};">
+                <div style="max-width:76%; padding:.5rem .85rem; border-radius:12px;
+                             background:{{ $mio ? '#ede9fe' : '#f0fdf4' }};
+                             border:1px solid {{ $mio ? 'rgba(61,35,114,0.2)' : '#a7f3d0' }};">
+                    <p style="font-size:.875rem; color:#1f103b; word-break:break-word; margin:0;">{{ $com->texto }}</p>
+                    <p style="font-size:.68rem; color:#9490b0; margin:.2rem 0 0;">
+                        {{ $com->user->name }} · {{ $com->created_at->format('H:i') }}
                         @if($com->resuelto) · <span style="color:#059669;">✓ atendido</span>@endif
                     </p>
                 </div>
             </div>
             @empty
-            <p class="text-center text-sm py-4" style="color:#cdc9e8;">Sin mensajes aún. Escríbele a Pricing.</p>
+            <p style="text-align:center; font-size:.85rem; color:#cdc9e8; padding:2rem 0;">Sin mensajes aún.</p>
             @endforelse
         </div>
 
-        {{-- Input ventas --}}
-        <div class="px-4 py-3 border-t flex gap-2" x-data="{ msg: '' }">
-            <input x-model="msg"
-                type="text"
-                class="flex-1 border rounded-lg px-3 py-2 text-sm outline-none"
-                style="border-color:rgba(61,35,114,0.18);"
-                onfocus="this.style.borderColor='#3d2372';" onblur="this.style.borderColor='rgba(61,35,114,0.18)';"
-                placeholder="Escribe un mensaje para Pricing..."
-                @keydown.enter.prevent="if(msg.trim()){ $wire.agregarComentario(msg); msg=''; }">
-            <button
-                @click="if(msg.trim()){ $wire.agregarComentario(msg); msg=''; }"
-                :disabled="!msg.trim()"
-                class="px-4 py-2 text-white rounded-lg text-sm font-semibold"
-                style="background:#3d2372; border:none; cursor:pointer;"
-                :style="msg.trim() ? 'opacity:1' : 'opacity:.4'">
+        {{-- Input — wire:model puro, sin Alpine --}}
+        <div style="padding:.65rem 1rem; border-top:1px solid #f0edf8; display:flex; gap:.5rem;">
+            <input type="text"
+                   wire:model="nuevoComentario"
+                   wire:keydown.enter="enviarMensaje"
+                   style="flex:1; border:1.5px solid #e9e5f5; border-radius:8px; padding:.5rem .9rem;
+                          font-size:.9rem; outline:none; font-family:inherit; background:#faf9ff;"
+                   onfocus="this.style.borderColor='#3d2372';"
+                   onblur="this.style.borderColor='#e9e5f5';"
+                   placeholder="Escribe un mensaje a Pricing...">
+            <button wire:click="enviarMensaje"
+                    style="padding:.5rem 1.25rem; background:#3d2372; color:white; border:none;
+                           border-radius:8px; font-size:.875rem; font-weight:600; cursor:pointer;
+                           white-space:nowrap;"
+                    onmouseover="this.style.background='#5035a0';"
+                    onmouseout="this.style.background='#3d2372';">
                 Enviar
             </button>
         </div>
     </div>
     <script>
-    function scrollChat() {
-        var el = document.getElementById('chatScroll');
-        if (el) el.scrollTop = el.scrollHeight;
-    }
-    document.addEventListener('DOMContentLoaded', scrollChat);
-    document.addEventListener('livewire:update', scrollChat);
+    document.addEventListener('livewire:updated', function(){
+        var el = document.getElementById('chatScrollV');
+        if(el) el.scrollTop = el.scrollHeight;
+    });
+    document.addEventListener('DOMContentLoaded', function(){
+        var el = document.getElementById('chatScrollV');
+        if(el) el.scrollTop = el.scrollHeight;
+    });
     </script>
 
     {{-- Timeline historial --}}

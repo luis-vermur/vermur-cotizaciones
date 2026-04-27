@@ -10,7 +10,7 @@
             </h1>
             <p style="font-size:.875rem; color:#9490b0; margin-top:.25rem;">
                 Hola, <strong style="color:#5a4e80;">{{ auth()->user()->name }}</strong> —
-                {{ $solicitudes->count() }} {{ $solicitudes->count() === 1 ? 'solicitud' : 'solicitudes' }} en total
+                {{ $solicitudes->total() }} {{ $solicitudes->total() === 1 ? 'solicitud' : 'solicitudes' }} en total
             </p>
         </div>
         <a href="{{ route('ventas.crear') }}"
@@ -134,5 +134,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($solicitudes->hasPages())
+    <div style="margin-top:1.25rem;">
+        {{ $solicitudes->links() }}
+    </div>
+    @endif
 
 </div>

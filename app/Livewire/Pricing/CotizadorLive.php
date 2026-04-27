@@ -83,7 +83,7 @@ class CotizadorLive extends Component
     public string $nuevoProveedorNombre  = '';
 
     // Chat pricing
-    public string $nuevoComentarioPricing = '';
+    public string $msgPricing = '';
 
     // Modal — cargar tarifas de solicitud anterior
     public bool   $mostrarModalTarifasAnt = false;
@@ -109,6 +109,7 @@ class CotizadorLive extends Component
 
     public function mount(int $solicitud)
     {
+        if (!in_array(auth()->user()->rol, ['pricing', 'admin'])) abort(403);
         $this->solicitudId = $solicitud;
 
         $ultima = Cotizacion::where('solicitud_id', $solicitud)
@@ -161,7 +162,7 @@ class CotizadorLive extends Component
             $this->lcl_transmision      = $d->transmision      ?? 0;
             $this->lcl_admon_fee        = $d->admon_fee        ?? 0;
             $this->lcl_recargo_imo      = $d->recargo_imo      ?? 0;
-            $this->lcl_iva_pct          = 16;
+            $this->lcl_iva_pct          = $d->iva_pct ?? 16;
             $this->recalcularLcl();
         }
 
@@ -268,7 +269,7 @@ class CotizadorLive extends Component
     public function crearProveedor()
     {
         $this->validateOnly('nuevoProveedorNombre', [
-            'nuevoProveedorNombre' => 'required|string|min:2',
+            'nuevoProveedorNombre' => 'required|string|min:2|unique:proveedores,nombre',
         ]);
 
         $p = Proveedor::create([
@@ -282,9 +283,9 @@ class CotizadorLive extends Component
         $this->mostrarCrearProveedor  = false;
     }
 
-    public function responderComentario(string $texto)
+    public function enviarMensajePricing(): void
     {
-        $texto = trim($texto);
+        $texto = trim($this->msgPricing);
         if (!$texto) return;
 
         Comentario::create([
@@ -293,11 +294,16 @@ class CotizadorLive extends Component
             'texto'        => $texto,
             'rol'          => 'pricing',
         ]);
+
+        $this->msgPricing = '';
     }
 
     public function marcarResuelto(int $id)
     {
         $comentario = Comentario::where('solicitud_id', $this->solicitudId)->findOrFail($id);
+        if ($comentario->user_id !== auth()->id() && auth()->user()->rol !== 'admin') {
+            abort(403);
+        }
         $comentario->update([
             'resuelto'    => true,
             'resuelto_en' => now(),
@@ -518,6 +524,7 @@ class CotizadorLive extends Component
 
     public function guardar()
     {
+        try {
         $this->recalcularTodo();
 
         $solicitud = Solicitud::findOrFail($this->solicitudId);
@@ -606,6 +613,7 @@ class CotizadorLive extends Component
                     'admon_fee'        => $this->lcl_admon_fee,
                     'recargo_imo'      => $this->lcl_recargo_imo,
                     'total_local'      => $this->lcl_total_local,
+                    'iva_pct'          => $this->lcl_iva_pct,
                     'iva'              => $this->lcl_iva,
                     'total_iva'        => $this->lcl_total_iva,
                 ]
@@ -628,10 +636,22 @@ class CotizadorLive extends Component
 
         session()->flash('success', "Cotización {$folioCoti} guardada correctamente.");
         return redirect()->route('pricing.dashboard');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('CotizadorLive::guardar', [
+                'error'        => $e->getMessage(),
+                'solicitud_id' => $this->solicitudId,
+            ]);
+            session()->flash('error', 'Error al guardar la cotización. Intenta de nuevo.');
+        }
     }
 
     public function nuevaVersion()
     {
+        $count = Cotizacion::where('solicitud_id', $this->solicitudId)->count();
+        if ($count >= 10) {
+            session()->flash('error', 'Límite máximo de 10 versiones alcanzado.');
+            return;
+        }
         $this->version++;
         $this->lineas = [];
         $this->recalcularTodo();

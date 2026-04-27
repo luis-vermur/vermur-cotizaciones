@@ -18,17 +18,14 @@ class DashboardAdmin extends Component
 
     public function render()
     {
-        $estados = ['nueva', 'en_revision', 'cotizada', 'enviada', 'rechazada'];
-        $solicitudesPorEstado = [];
-        foreach ($estados as $e) {
-            $solicitudesPorEstado[$e] = Solicitud::where('estado', $e)->count();
-        }
+        $allStats = Solicitud::statsPorEstado();
+        $solicitudesPorEstado = array_diff_key($allStats, ['total' => true]);
 
         $ahora = now();
         $inicioMes = $ahora->copy()->startOfMonth();
 
         $stats = [
-            'solicitudes_total'  => Solicitud::count(),
+            'solicitudes_total'  => $allStats['total'],
             'solicitudes_mes'    => Solicitud::where('created_at', '>=', $inicioMes)->count(),
             'cotizaciones_total' => Cotizacion::count(),
             'ventas_mes'         => Cotizacion::where('created_at', '>=', $inicioMes)->sum('venta_total'),
@@ -43,7 +40,7 @@ class DashboardAdmin extends Component
             ->limit(8)
             ->get();
 
-        $cotizacionesRecientes = Cotizacion::with('solicitud')
+        $cotizacionesRecientes = Cotizacion::with(['solicitud', 'creadoPor'])
             ->orderByDesc('created_at')
             ->limit(6)
             ->get();

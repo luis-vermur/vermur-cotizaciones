@@ -22,17 +22,19 @@ class VerSolicitudVentas extends Component
         }
     }
 
-    public function agregarComentario(string $texto)
+    public function enviarMensaje(): void
     {
-        $texto = trim($texto);
+        $texto = trim($this->nuevoComentario);
         if (!$texto) return;
 
         Comentario::create([
             'solicitud_id' => $this->solicitudId,
             'user_id'      => auth()->id(),
             'texto'        => $texto,
-            'rol'          => auth()->user()->rol,
+            'rol'          => 'ventas',
         ]);
+
+        $this->nuevoComentario = '';
     }
 
     public function render()

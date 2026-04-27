@@ -71,7 +71,12 @@ class GestionClientes extends Component
 
     public function eliminar(int $id)
     {
-        Cliente::findOrFail($id)->delete();
+        $cliente = Cliente::withCount('solicitudes')->findOrFail($id);
+        if ($cliente->solicitudes_count > 0) {
+            session()->flash('error', 'No se puede eliminar un cliente con solicitudes asociadas.');
+            return;
+        }
+        $cliente->delete();
         session()->flash('success', 'Cliente eliminado.');
     }
 

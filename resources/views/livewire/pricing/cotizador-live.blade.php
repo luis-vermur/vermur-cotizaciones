@@ -47,6 +47,11 @@
     @if(session('info'))
     <div class="v-alert v-alert-info"><span>ℹ</span><span>{{ session('info') }}</span></div>
     @endif
+    @if(session('error'))
+    <div class="v-alert" style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; border-radius:8px; padding:.75rem 1rem; font-size:.875rem; font-weight:600; display:flex; gap:.5rem; align-items:center;">
+        <span>✕</span><span>{{ session('error') }}</span>
+    </div>
+    @endif
 
     {{-- Configuración --}}
     <div class="vcard" style="padding:1.25rem 1.5rem;">
@@ -916,7 +921,7 @@
         </div>
         @endif
 
-        {{-- Chat dos canales --}}
+        {{-- Chat con Ventas --}}
         <div style="background:white; border:1px solid rgba(61,35,114,0.15); border-radius:8px; overflow:hidden;">
             <div style="padding:.65rem 1rem; background:#f8f7fc; border-bottom:1px solid rgba(61,35,114,0.1);
                         display:flex; align-items:center; justify-content:space-between;">
@@ -930,29 +935,26 @@
                 @endif
             </div>
 
-            {{-- Mensajes --}}
-            <div style="max-height:260px; overflow-y:auto; padding:.6rem .75rem; display:flex; flex-direction:column; gap:.4rem;">
+            {{-- Lista de mensajes --}}
+            <div id="chatScrollP" style="max-height:260px; overflow-y:auto; padding:.6rem .75rem;
+                                          display:flex; flex-direction:column; gap:.4rem;">
                 @forelse($solicitud->comentarios->sortBy('created_at') as $com)
-                <div style="display:flex; flex-direction:column;
-                             align-items:{{ $com->rol === 'pricing' ? 'flex-end' : 'flex-start' }};">
-                    <div style="max-width:90%; padding:.45rem .65rem; border-radius:8px; position:relative;
-                                background:{{ $com->resuelto ? '#f0fdf4' : ($com->rol === 'pricing' ? '#ede9fe' : '#fffbeb') }};
-                                border:1px solid {{ $com->resuelto ? '#bbf7d0' : ($com->rol === 'pricing' ? 'rgba(61,35,114,0.15)' : '#fde68a') }};">
-                        <p style="font-size:.8rem; color:{{ $com->resuelto ? '#6b7280' : '#1f103b' }};
-                                   text-decoration:{{ $com->resuelto ? 'line-through' : 'none' }}; word-break:break-word;">
-                            {{ $com->texto }}
-                        </p>
-                        <p style="font-size:.65rem; color:#9490b0; margin-top:.2rem;">
-                            {{ $com->user->name }} · {{ $com->created_at->format('d/m H:i') }}
-                            @if($com->resuelto) · <span style="color:#059669;">✓ atendido</span>@endif
+                @php $mio = $com->rol === 'pricing'; @endphp
+                <div wire:key="pchat-{{ $com->id }}"
+                     style="display:flex; flex-direction:column; align-items:{{ $mio ? 'flex-end' : 'flex-start' }};">
+                    <div style="max-width:90%; padding:.4rem .65rem; border-radius:12px;
+                                background:{{ $mio ? '#ede9fe' : ($com->resuelto ? '#f0fdf4' : '#fffbeb') }};
+                                border:1px solid {{ $mio ? 'rgba(61,35,114,0.2)' : ($com->resuelto ? '#a7f3d0' : '#fde68a') }};">
+                        <p style="font-size:.8rem; color:#1f103b; word-break:break-word; margin:0;">{{ $com->texto }}</p>
+                        <p style="font-size:.65rem; color:#9490b0; margin:.2rem 0 0;">
+                            {{ $com->user->name }} · {{ $com->created_at->format('H:i') }}
+                            @if($com->resuelto && !$mio) · <span style="color:#059669;">✓</span>@endif
                         </p>
                     </div>
-                    @if(!$com->resuelto && $com->rol === 'ventas' && in_array(auth()->user()->rol, ['pricing','admin']))
+                    @if(!$com->resuelto && !$mio && in_array(auth()->user()->rol, ['pricing','admin']))
                     <button wire:click="marcarResuelto({{ $com->id }})"
-                        style="font-size:.65rem; color:#9490b0; background:none; border:none; cursor:pointer;
-                               margin-top:.15rem; padding:0;"
-                        onmouseover="this.style.color='#059669';"
-                        onmouseout="this.style.color='#9490b0';">
+                        style="font-size:.65rem; color:#9490b0; background:none; border:none; cursor:pointer; margin-top:.1rem; padding:0;"
+                        onmouseover="this.style.color='#059669';" onmouseout="this.style.color='#9490b0';">
                         ✓ Marcar atendido
                     </button>
                     @endif
@@ -962,22 +964,24 @@
                 @endforelse
             </div>
 
-            {{-- Input respuesta pricing --}}
+            {{-- Input — wire:model puro, sin Alpine --}}
             @if(in_array(auth()->user()->rol, ['pricing','admin']))
-            <div style="padding:.6rem .75rem; border-top:1px solid rgba(61,35,114,0.08); display:flex; gap:.4rem;"
-                 x-data>
+            <div style="padding:.55rem .75rem; border-top:1px solid #f0edf8; display:flex; gap:.4rem;">
                 <input type="text"
-                    x-ref="inp"
-                    style="flex:1; border:1px solid rgba(61,35,114,0.18); border-radius:4px;
-                           padding:.38rem .6rem; font-size:.78rem; font-family:'DM Sans',sans-serif; outline:none;"
-                    onfocus="this.style.borderColor='#3d2372';" onblur="this.style.borderColor='rgba(61,35,114,0.18)';"
-                    placeholder="Responder..."
-                    @keydown.enter.prevent="let v=$refs.inp.value.trim(); if(v){ $wire.responderComentario(v); $refs.inp.value=''; }">
-                <button
-                    @click="let v=$refs.inp.value.trim(); if(v){ $wire.responderComentario(v); $refs.inp.value=''; }"
-                    style="padding:.38rem .7rem; background:#3d2372; color:white; border:none;
-                           border-radius:4px; font-size:.78rem; cursor:pointer;">
-                    ↑
+                       wire:model="msgPricing"
+                       wire:keydown.enter="enviarMensajePricing"
+                       style="flex:1; border:1.5px solid #e9e5f5; border-radius:8px; padding:.45rem .8rem;
+                              font-size:.82rem; font-family:'DM Sans',sans-serif; outline:none; background:#faf9ff;"
+                       onfocus="this.style.borderColor='#3d2372';"
+                       onblur="this.style.borderColor='#e9e5f5';"
+                       placeholder="Responder a Ventas...">
+                <button wire:click="enviarMensajePricing"
+                        style="padding:.45rem 1rem; background:#3d2372; color:white; border:none;
+                               border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer;
+                               white-space:nowrap;"
+                        onmouseover="this.style.background='#5035a0';"
+                        onmouseout="this.style.background='#3d2372';">
+                    Enviar
                 </button>
             </div>
             @endif
@@ -985,6 +989,17 @@
 
     </div>{{-- /right column --}}
     </div>{{-- /2-col grid --}}
+
+    <script>
+    document.addEventListener('livewire:updated', function () {
+        var el = document.getElementById('chatScrollP');
+        if (el) el.scrollTop = el.scrollHeight;
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('chatScrollP');
+        if (el) el.scrollTop = el.scrollHeight;
+    });
+    </script>
 
 {{-- Notas (solo pricing/admin) --}}
 @if(in_array(auth()->user()->rol, ['pricing','admin']))

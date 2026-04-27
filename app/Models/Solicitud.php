@@ -111,6 +111,23 @@ class Solicitud extends Model
         return $this->hasMany(Cotizacion::class);
     }
 
+    public static function statsPorEstado(?int $creadoPor = null): array
+    {
+        $rows = static::selectRaw('estado, COUNT(*) as total')
+            ->when($creadoPor, fn($q) => $q->where('creado_por', $creadoPor))
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        return [
+            'total'       => (int) $rows->sum(),
+            'nueva'       => (int) ($rows['nueva'] ?? 0),
+            'en_revision' => (int) ($rows['en_revision'] ?? 0),
+            'cotizada'    => (int) ($rows['cotizada'] ?? 0),
+            'enviada'     => (int) ($rows['enviada'] ?? 0),
+            'rechazada'   => (int) ($rows['rechazada'] ?? 0),
+        ];
+    }
+
     // Scopes
     public function scopeParaUsuario($query, User $user)
     {

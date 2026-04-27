@@ -51,6 +51,11 @@
         <span>✓</span><span>{{ session('success') }}</span>
     </div>
     @endif
+    @if(session('error'))
+    <div class="v-alert" style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; border-radius:8px; padding:.75rem 1rem; font-size:.875rem; font-weight:600; display:flex; gap:.5rem; align-items:center; margin-bottom:1rem;">
+        <span>✕</span><span>{{ session('error') }}</span>
+    </div>
+    @endif
 
     {{-- Rechazo --}}
     @if($mostrarRechazo)

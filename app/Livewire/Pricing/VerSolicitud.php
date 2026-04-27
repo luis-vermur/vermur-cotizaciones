@@ -24,6 +24,7 @@ class VerSolicitud extends Component
 
     public function mount(int $solicitud)
     {
+        if (!in_array(auth()->user()->rol, ['pricing', 'admin'])) abort(403);
         $this->solicitudId = $solicitud;
         $sol = $this->getSolicitud();
         $this->notaInterna = $sol->nota_interna ?? '';
@@ -79,9 +80,15 @@ class VerSolicitud extends Component
     {
         $this->validate(['motivoRechazo' => 'required|string|min:5']);
 
-        $solicitud      = $this->getSolicitud();
-        $estadoAnterior = $solicitud->estado;
+        $solicitud = $this->getSolicitud();
 
+        if (!$solicitud->puedeTransicionarA('rechazada')) {
+            session()->flash('error', 'Esta solicitud no puede rechazarse desde su estado actual.');
+            $this->mostrarRechazo = false;
+            return;
+        }
+
+        $estadoAnterior = $solicitud->estado;
         $solicitud->update(['estado' => 'rechazada']);
 
         HistorialEstado::create([
@@ -136,19 +143,13 @@ class VerSolicitud extends Component
 
     public function render()
     {
-
-
         $solicitud    = $this->getSolicitud();
-        $comentarios  = $solicitud->comentarios()->with('user')->orderBy('created_at')->get();
-        $historial    = $solicitud->historial()->with('user')->orderBy('created_at')->get();
-        $cotizaciones = $solicitud->cotizaciones()->orderBy('version')->get();
-
+        $comentarios  = $solicitud->comentarios->sortBy('created_at');
+        $historial    = $solicitud->historial->sortBy('created_at');
+        $cotizaciones = $solicitud->cotizaciones->sortBy('version');
 
         return view('livewire.pricing.ver-solicitud', compact(
-            'solicitud',
-            'comentarios',
-            'historial',
-            'cotizaciones'
+            'solicitud', 'comentarios', 'historial', 'cotizaciones'
         ))->layout('layouts.ventas');
     }
 }

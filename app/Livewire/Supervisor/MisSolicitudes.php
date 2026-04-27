@@ -3,10 +3,13 @@
 namespace App\Livewire\Supervisor;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Solicitud;
 
 class MisSolicitudes extends Component
 {
+    use WithPagination;
+
     public function mount()
     {
         if (!in_array(auth()->user()->rol, ['supervisor', 'admin'])) abort(403);
@@ -14,17 +17,11 @@ class MisSolicitudes extends Component
 
     public function render()
     {
+        $stats = Solicitud::statsPorEstado(auth()->id());
+
         $solicitudes = Solicitud::where('creado_por', auth()->id())
             ->orderByDesc('created_at')
-            ->get();
-
-        $stats = [
-            'nueva'       => $solicitudes->where('estado', 'nueva')->count(),
-            'en_revision' => $solicitudes->where('estado', 'en_revision')->count(),
-            'cotizada'    => $solicitudes->where('estado', 'cotizada')->count(),
-            'enviada'     => $solicitudes->where('estado', 'enviada')->count(),
-            'rechazada'   => $solicitudes->where('estado', 'rechazada')->count(),
-        ];
+            ->paginate(25);
 
         return view('livewire.supervisor.mis-solicitudes', compact('solicitudes', 'stats'))
             ->layout('layouts.supervisor');

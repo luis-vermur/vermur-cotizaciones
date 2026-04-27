@@ -26,14 +26,7 @@ class DashboardGeneral extends Component
 
     public function render()
     {
-        $stats = [
-            'total'       => Solicitud::count(),
-            'nueva'       => Solicitud::where('estado', 'nueva')->count(),
-            'en_revision' => Solicitud::where('estado', 'en_revision')->count(),
-            'cotizada'    => Solicitud::where('estado', 'cotizada')->count(),
-            'enviada'     => Solicitud::where('estado', 'enviada')->count(),
-            'rechazada'   => Solicitud::where('estado', 'rechazada')->count(),
-        ];
+        $stats = Solicitud::statsPorEstado();
 
         $vendedores = User::whereIn('rol', ['ventas', 'supervisor'])
             ->withCount([

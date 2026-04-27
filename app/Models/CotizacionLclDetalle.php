@@ -13,7 +13,7 @@ class CotizacionLclDetalle extends Model
         'pol', 'pod', 'incoterm', 'piezas', 'peso_tons', 'medidas_cbm',
         'pickup', 'despacho_mxn', 'maniobras_mxn', 'desconsolidacion',
         'transfer_fee', 'revalidacion', 'transmision', 'admon_fee',
-        'recargo_imo', 'total_local', 'iva', 'total_iva',
+        'recargo_imo', 'iva_pct', 'total_local', 'iva', 'total_iva',
     ];
 
     public function cotizacion()

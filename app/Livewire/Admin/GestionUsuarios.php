@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class GestionUsuarios extends Component
@@ -65,7 +64,7 @@ class GestionUsuarios extends Component
         $rules = [
             'nombre' => 'required|string|min:2|max:255',
             'email'  => ['required', 'email', $emailRule],
-            'rol'    => 'required|in:ventas,pricing,admin',
+            'rol'    => 'required|in:ventas,pricing,supervisor,admin',
             'activo' => 'boolean',
         ];
 
@@ -87,14 +86,19 @@ class GestionUsuarios extends Component
         }
 
         if ($this->editando) {
+            if ($this->editId === auth()->id() && $this->rol !== 'admin') {
+                session()->flash('error', 'No puedes cambiar tu propio rol.');
+                $this->mostrarModal = false;
+                return;
+            }
             User::findOrFail($this->editId)->update($datos);
             session()->flash('success', 'Usuario actualizado correctamente.');
         } else {
             if (!isset($datos['password'])) {
-                $datos['password'] = Hash::make('password');
+                $datos['password'] = 'password';
             }
             User::create($datos);
-            session()->flash('success', 'Usuario creado correctamente.');
+            session()->flash('success', 'Usuario creado. Contraseña por defecto: "password".');
         }
 
         $this->mostrarModal = false;

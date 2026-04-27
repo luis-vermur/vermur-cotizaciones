@@ -8,7 +8,7 @@
             Panel de solicitudes
         </h1>
         <p style="font-size:.875rem; color:#9490b0; margin-top:.25rem;">
-            {{ $solicitudes->count() }} {{ $solicitudes->count() === 1 ? 'solicitud' : 'solicitudes' }} visibles según filtros actuales
+            {{ $solicitudes->total() }} {{ $solicitudes->total() === 1 ? 'solicitud' : 'solicitudes' }} visibles según filtros actuales
         </p>
     </div>
 
@@ -170,5 +170,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($solicitudes->hasPages())
+    <div style="margin-top:1.25rem;">
+        {{ $solicitudes->links() }}
+    </div>
+    @endif
 
 </div>

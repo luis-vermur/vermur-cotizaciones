@@ -4,6 +4,7 @@ namespace App\Livewire\Ventas;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 
 class Login extends Component
 {
@@ -18,7 +19,16 @@ class Login extends Component
             'password' => 'required',
         ]);
 
+        $key = 'login:' . str($this->email)->lower() . '|' . request()->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            $this->error = "Demasiados intentos. Intenta en {$seconds} segundos.";
+            return;
+        }
+
         if (!Auth::attempt(['email' => $this->email, 'password' => $this->password])) {
+            RateLimiter::hit($key, 60);
             $this->error = 'Credenciales incorrectas.';
             return;
         }
@@ -31,14 +41,14 @@ class Login extends Component
             return;
         }
 
-        // Redirigir según rol
+        RateLimiter::clear($key);
+
         if ($user->rol === 'admin') {
             return redirect()->route('admin.dashboard');
         }
         if ($user->rol === 'pricing') {
             return redirect()->route('pricing.dashboard');
         }
-
         if ($user->rol === 'supervisor') {
             return redirect()->route('supervisor.dashboard');
         }

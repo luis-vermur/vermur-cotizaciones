@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthVentasController;
-
 // Ruta raíz — redirige según rol
 Route::get('/', function () {
     if (!auth()->check()) {

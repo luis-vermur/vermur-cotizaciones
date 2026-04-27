@@ -18,6 +18,11 @@
         ✓ {{ session('success') }}
     </div>
     @endif
+    @if(session('error'))
+    <div style="padding:.75rem 1rem; background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; color:#991b1b; font-size:.85rem; font-weight:600;">
+        {{ session('error') }}
+    </div>
+    @endif
 
     <div style="background:white; border-radius:10px; padding:1rem 1.25rem; border:1px solid rgba(61,35,114,0.08); display:flex; gap:.75rem; flex-wrap:wrap; align-items:center;">
         <input wire:model.live="busqueda" type="text"

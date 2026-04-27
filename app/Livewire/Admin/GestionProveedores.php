@@ -52,8 +52,12 @@ class GestionProveedores extends Component
 
     public function guardar()
     {
+        $nombreRule = $this->editando
+            ? Rule::unique('proveedores', 'nombre')->ignore($this->editId)
+            : Rule::unique('proveedores', 'nombre');
+
         $this->validate([
-            'nombre'       => 'required|string|min:2',
+            'nombre'       => ['required', 'string', 'min:2', $nombreRule],
             'correo'       => 'nullable|email',
             'terminosPago' => 'required|integer|min:0|max:365',
             'activo'       => 'boolean',
