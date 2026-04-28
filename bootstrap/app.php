@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
+        $middleware->trustProxies(at: '*');
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
