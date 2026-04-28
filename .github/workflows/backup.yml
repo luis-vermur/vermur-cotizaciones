@@ -1,0 +1,36 @@
+name: Weekly Database Backup
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install MySQL client
+        run: sudo apt-get install -y mysql-client
+
+      - name: Run backup
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+        run: |
+          mkdir -p backups
+          mysqldump -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS $DB_NAME \
+            > backups/backup_$(date +%Y%m%d_%H%M%S).sql
+          echo "Backup completado: $(ls -lh backups/*.sql | tail -1)"
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: db-backup-${{ github.run_number }}
+          path: backups/
+          retention-days: 90
