@@ -4,46 +4,57 @@
     <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
         <div style="display:flex; align-items:center; gap:.75rem; flex-wrap:wrap;">
             <a href="{{ route('pricing.dashboard') }}"
-               style="font-size:.82rem; color:#9490b0; text-decoration:none; font-weight:500;"
-               onmouseover="this.style.color='#3d2372';" onmouseout="this.style.color='#9490b0';">
-               ← Volver
+                style="font-size:.82rem; color:#9490b0; text-decoration:none; font-weight:500;"
+                onmouseover="this.style.color='#3d2372';" onmouseout="this.style.color='#9490b0';">
+                ← Volver
             </a>
             <h1 style="font-family:monospace; font-size:1.3rem; font-weight:700; color:#3d2372;">
                 {{ $solicitud->folio }}
             </h1>
             @php
             $badgeClass = [
-                'nueva'=>'v-badge-nueva','en_revision'=>'v-badge-revision',
-                'cotizada'=>'v-badge-cotizada','enviada'=>'v-badge-enviada','rechazada'=>'v-badge-rechazada',
+            'nueva'=>'v-badge-nueva','en_revision'=>'v-badge-revision',
+            'cotizada'=>'v-badge-cotizada','enviada'=>'v-badge-enviada','rechazada'=>'v-badge-rechazada',
             ][$solicitud->estado] ?? 'v-badge-nueva';
             $estadoLabel = ['nueva'=>'Nueva','en_revision'=>'En revisión','cotizada'=>'Cotizada',
-                            'enviada'=>'Enviada','rechazada'=>'Rechazada'][$solicitud->estado] ?? '-';
+            'enviada'=>'Enviada','rechazada'=>'Rechazada'][$solicitud->estado] ?? '-';
             @endphp
             <span class="v-badge {{ $badgeClass }}">{{ $estadoLabel }}</span>
         </div>
         <div style="display:flex; gap:.5rem;">
             @if($solicitud->estado !== 'rechazada' && $solicitud->estado !== 'enviada')
             <a href="{{ route('pricing.cotizador', $solicitud->id) }}"
-               style="display:inline-flex; align-items:center; gap:.4rem;
+                style="display:inline-flex; align-items:center; gap:.4rem;
                       padding:.55rem 1.2rem; background:#cd3529; color:white;
                       border-radius:4px; font-size:.82rem; font-weight:700;
                       text-decoration:none; transition:background .2s, transform .2s;"
-               onmouseover="this.style.background='#e04a3e';this.style.transform='translateY(-1px)';"
-               onmouseout="this.style.background='#cd3529';this.style.transform='none';">
-               Cotizar →
+                onmouseover="this.style.background='#e04a3e';this.style.transform='translateY(-1px)';"
+                onmouseout="this.style.background='#cd3529';this.style.transform='none';">
+                Cotizar →
             </a>
             <button wire:click="$set('mostrarRechazo', true)"
-               style="display:inline-flex; align-items:center; gap:.4rem;
+                style="display:inline-flex; align-items:center; gap:.4rem;
                       padding:.55rem 1.2rem; background:transparent; color:#cd3529;
                       border:1px solid rgba(205,53,41,0.4);
                       border-radius:4px; font-size:.82rem; font-weight:700; cursor:pointer;
                       transition:background .2s, border-color .2s; font-family:'DM Sans',sans-serif;"
-               onmouseover="this.style.background='rgba(205,53,41,0.06)';this.style.borderColor='#cd3529';"
-               onmouseout="this.style.background='transparent';this.style.borderColor='rgba(205,53,41,0.4)';">
-               Rechazar
+                onmouseover="this.style.background='rgba(205,53,41,0.06)';this.style.borderColor='#cd3529';"
+                onmouseout="this.style.background='transparent';this.style.borderColor='rgba(205,53,41,0.4)';">
+                Rechazar
             </button>
             @endif
         </div>
+        @if($solicitud->estado === 'cotizada')
+        <button wire:click="$set('mostrarEntrega', true)"
+            style="display:inline-flex; align-items:center; gap:.4rem;
+          padding:.55rem 1.2rem; background:#059669; color:white;
+          border:none; border-radius:4px; font-size:.82rem; font-weight:700;
+          cursor:pointer; transition:background .2s; font-family:'DM Sans',sans-serif;"
+            onmouseover="this.style.background='#047857';"
+            onmouseout="this.style.background='#059669';">
+            Entregar a Ventas
+        </button>
+        @endif
     </div>
 
     @if(session('success'))
@@ -73,16 +84,62 @@
         @enderror
         <div style="display:flex; gap:.5rem;">
             <button wire:click="rechazar"
-               style="padding:.55rem 1.2rem; background:#cd3529; color:white; border:none;
+                style="padding:.55rem 1.2rem; background:#cd3529; color:white; border:none;
                       border-radius:4px; font-size:.82rem; font-weight:700; cursor:pointer;
                       font-family:'DM Sans',sans-serif;">
-               Confirmar rechazo
+                Confirmar rechazo
             </button>
             <button wire:click="$set('mostrarRechazo', false)"
-               style="padding:.55rem 1.2rem; background:transparent; border:1px solid rgba(61,35,114,0.18);
+                style="padding:.55rem 1.2rem; background:transparent; border:1px solid rgba(61,35,114,0.18);
                       color:#5a4e80; border-radius:4px; font-size:.82rem; font-weight:600;
                       cursor:pointer; font-family:'DM Sans',sans-serif;">
-               Cancelar
+                Cancelar
+            </button>
+        </div>
+    </div>
+    @endif
+
+    @if($mostrarEntrega)
+    <div style="background:#f0fdf4; border:1px solid rgba(5,150,105,0.3); border-radius:12px; padding:1.25rem;">
+        <h3 style="font-weight:700; color:#059669; margin-bottom:.75rem; font-size:.95rem;">
+            Entregar cotización a Ventas
+        </h3>
+        <p style="font-size:.85rem; color:#065f46; margin-bottom:.75rem;">
+            Sube el PDF final. El estado cambiará a <strong>Enviada</strong>.
+        </p>
+        <div style="border:2px dashed rgba(5,150,105,0.4); border-radius:8px; padding:1rem;
+                text-align:center; cursor:pointer; margin-bottom:.75rem;"
+            onclick="document.getElementById('pdfEntregaInput').click()">
+            <p style="font-size:1.5rem; margin-bottom:.25rem;">📄</p>
+            <p style="font-size:.85rem; color:#6b7280;">
+                <strong>Seleccionar PDF</strong> o arrastra aquí
+            </p>
+            <input type="file" id="pdfEntregaInput" wire:model="pdfEntrega"
+                accept=".pdf" class="hidden">
+        </div>
+        @if($pdfEntrega)
+        <div style="background:white; border-radius:6px; padding:.5rem .75rem; font-size:.85rem;
+                    color:#059669; margin-bottom:.75rem; border:1px solid rgba(5,150,105,0.2);">
+            ✓ {{ $pdfEntrega->getClientOriginalName() }}
+        </div>
+        @endif
+        @error('pdfEntrega')
+        <p style="color:#cd3529; font-size:.75rem; margin-bottom:.5rem;">{{ $message }}</p>
+        @enderror
+        <div style="display:flex; gap:.5rem;">
+            <button wire:click="entregarAVentas"
+                style="padding:.55rem 1.2rem; background:#059669; color:white; border:none;
+                   border-radius:4px; font-size:.82rem; font-weight:700; cursor:pointer;
+                   font-family:'DM Sans',sans-serif;"
+                wire:loading.attr="disabled">
+                <span wire:loading.remove>Confirmar entrega</span>
+                <span wire:loading>Subiendo...</span>
+            </button>
+            <button wire:click="$set('mostrarEntrega', false)"
+                style="padding:.55rem 1.2rem; background:transparent; border:1px solid rgba(61,35,114,0.2);
+                   color:#5a4e80; border-radius:4px; font-size:.82rem; cursor:pointer;
+                   font-family:'DM Sans',sans-serif;">
+                Cancelar
             </button>
         </div>
     </div>
@@ -92,25 +149,31 @@
     <div class="vcard" style="padding:1.5rem;">
         <div class="v-section-header">Información general</div>
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; font-size:.875rem;">
-            <style>@media(min-width:768px){.info-grid{grid-template-columns:repeat(3,1fr)!important;}}</style>
+            <style>
+                @media(min-width:768px) {
+                    .info-grid {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                    }
+                }
+            </style>
             <div class="info-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; grid-column:1/-1;">
-            @foreach([
-                ['label'=>'Cliente',       'value'=>$solicitud->cliente_nombre],
-                ['label'=>'Días crédito',  'value'=>$solicitud->dias_credito.' días'],
-                ['label'=>'Operación',     'value'=>ucfirst($solicitud->tipo_operacion)],
-                ['label'=>'Transporte',    'value'=>ucfirst($solicitud->tipo_transporte)],
-                ['label'=>'Mercancía',     'value'=>$solicitud->tipo_mercancia ?: '—'],
-                ['label'=>'Incoterm',      'value'=>$solicitud->incoterm ?: '—'],
+                @foreach([
+                ['label'=>'Cliente', 'value'=>$solicitud->cliente_nombre],
+                ['label'=>'Días crédito', 'value'=>$solicitud->dias_credito.' días'],
+                ['label'=>'Operación', 'value'=>ucfirst($solicitud->tipo_operacion)],
+                ['label'=>'Transporte', 'value'=>ucfirst($solicitud->tipo_transporte)],
+                ['label'=>'Mercancía', 'value'=>$solicitud->tipo_mercancia ?: '—'],
+                ['label'=>'Incoterm', 'value'=>$solicitud->incoterm ?: '—'],
                 ['label'=>'Origen POL/AOL','value'=>$solicitud->pol_aol ?: '—'],
                 ['label'=>'Destino POD/ASD','value'=>$solicitud->pod_asd ?: '—'],
-                ['label'=>'Asignado a',    'value'=>$solicitud->asignadoA?->name ?? 'Sin asignar'],
-            ] as $field)
-            <div>
-                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+                ['label'=>'Asignado a', 'value'=>$solicitud->asignadoA?->name ?? 'Sin asignar'],
+                ] as $field)
+                <div>
+                    <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
                            color:#9490b0; margin-bottom:.2rem;">{{ $field['label'] }}</p>
-                <p style="font-weight:600; color:#1f103b;">{{ $field['value'] }}</p>
-            </div>
-            @endforeach
+                    <p style="font-weight:600; color:#1f103b;">{{ $field['value'] }}</p>
+                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -191,28 +254,34 @@
             </span>
         </div>
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem;">
-            <style>@media(min-width:768px){.adj-grid{grid-template-columns:repeat(3,1fr)!important;}}</style>
+            <style>
+                @media(min-width:768px) {
+                    .adj-grid {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                    }
+                }
+            </style>
             <div class="adj-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; grid-column:1/-1;">
-            @foreach($adjuntosSolicitud as $adjunto)
-            @php
-            $iconos = ['pdf'=>'📄','doc'=>'📝','docx'=>'📝','xls'=>'📊','xlsx'=>'📊','png'=>'🖼','jpg'=>'🖼','jpeg'=>'🖼','heic'=>'🖼'];
-            @endphp
-            <a href="{{ Storage::url($adjunto->ruta) }}" target="_blank"
-                style="display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem;
+                @foreach($adjuntosSolicitud as $adjunto)
+                @php
+                $iconos = ['pdf'=>'📄','doc'=>'📝','docx'=>'📝','xls'=>'📊','xlsx'=>'📊','png'=>'🖼','jpg'=>'🖼','jpeg'=>'🖼','heic'=>'🖼'];
+                @endphp
+                <a href="{{ Storage::url($adjunto->ruta) }}" target="_blank"
+                    style="display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem;
                        background:#f8f7fc; border-radius:8px; border:1px solid rgba(61,35,114,0.1);
                        text-decoration:none; transition:border-color .2s, background .2s;"
-                onmouseover="this.style.borderColor='#3d2372';this.style.background='#f0ecf8';"
-                onmouseout="this.style.borderColor='rgba(61,35,114,0.1)';this.style.background='#f8f7fc';">
-                <span style="font-size:1.4rem;">{{ $iconos[strtolower($adjunto->tipo ?? '')] ?? '📎' }}</span>
-                <div style="min-width:0; overflow:hidden;">
-                    <p style="font-size:.82rem; font-weight:600; color:#1f103b;
+                    onmouseover="this.style.borderColor='#3d2372';this.style.background='#f0ecf8';"
+                    onmouseout="this.style.borderColor='rgba(61,35,114,0.1)';this.style.background='#f8f7fc';">
+                    <span style="font-size:1.4rem;">{{ $iconos[strtolower($adjunto->tipo ?? '')] ?? '📎' }}</span>
+                    <div style="min-width:0; overflow:hidden;">
+                        <p style="font-size:.82rem; font-weight:600; color:#1f103b;
                                white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                        {{ $adjunto->nombre_archivo }}
-                    </p>
-                    <p style="font-size:.7rem; color:#9490b0; text-transform:uppercase; letter-spacing:.06em;">{{ $adjunto->tipo }}</p>
-                </div>
-            </a>
-            @endforeach
+                            {{ $adjunto->nombre_archivo }}
+                        </p>
+                        <p style="font-size:.7rem; color:#9490b0; text-transform:uppercase; letter-spacing:.06em;">{{ $adjunto->tipo }}</p>
+                    </div>
+                </a>
+                @endforeach
             </div>
         </div>
     </div>
@@ -222,26 +291,32 @@
     <div class="vcard" style="padding:1.5rem;">
         <div class="v-section-header">Servicios solicitados</div>
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem .75rem;">
-            <style>@media(min-width:768px){.srv-grid{grid-template-columns:repeat(4,1fr)!important;}}</style>
+            <style>
+                @media(min-width:768px) {
+                    .srv-grid {
+                        grid-template-columns: repeat(4, 1fr) !important;
+                    }
+                }
+            </style>
             <div class="srv-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:.5rem .75rem; grid-column:1/-1;">
-            @foreach([
-            ['key' => 'recoleccion', 'label' => 'Recolección'],
-            ['key' => 'entrega', 'label' => 'Entrega'],
-            ['key' => 'seguro_mercancia', 'label' => 'Seguro'],
-            ['key' => 'requiere_despacho', 'label' => 'Despacho aduanal'],
-            ['key' => 'embalaje', 'label' => 'Embalaje'],
-            ['key' => 'financiamiento', 'label' => 'Financiamiento'],
-            ] as $s)
-            <div style="display:flex; align-items:center; gap:.5rem; font-size:.875rem;">
-                <span style="font-weight:700; font-size:.9rem;
+                @foreach([
+                ['key' => 'recoleccion', 'label' => 'Recolección'],
+                ['key' => 'entrega', 'label' => 'Entrega'],
+                ['key' => 'seguro_mercancia', 'label' => 'Seguro'],
+                ['key' => 'requiere_despacho', 'label' => 'Despacho aduanal'],
+                ['key' => 'embalaje', 'label' => 'Embalaje'],
+                ['key' => 'financiamiento', 'label' => 'Financiamiento'],
+                ] as $s)
+                <div style="display:flex; align-items:center; gap:.5rem; font-size:.875rem;">
+                    <span style="font-weight:700; font-size:.9rem;
                              color:{{ $solicitud->{$s['key']} ? '#059669' : '#cdc9e8' }};">
-                    {{ $solicitud->{$s['key']} ? '✓' : '✗' }}
-                </span>
-                <span style="color:{{ $solicitud->{$s['key']} ? '#1f103b' : '#9490b0' }};">
-                    {{ $s['label'] }}
-                </span>
-            </div>
-            @endforeach
+                        {{ $solicitud->{$s['key']} ? '✓' : '✗' }}
+                    </span>
+                    <span style="color:{{ $solicitud->{$s['key']} ? '#1f103b' : '#9490b0' }};">
+                        {{ $s['label'] }}
+                    </span>
+                </div>
+                @endforeach
             </div>
         </div>
     </div>
@@ -380,13 +455,13 @@
                 placeholder="Escribe un comentario..."
                 wire:keydown.enter="agregarComentario">
             <button wire:click="agregarComentario"
-               style="padding:.6rem 1.2rem; background:#3d2372; color:white;
+                style="padding:.6rem 1.2rem; background:#3d2372; color:white;
                       border:none; border-radius:4px; font-family:'DM Sans',sans-serif;
                       font-size:.82rem; font-weight:700; cursor:pointer;
                       transition:background .2s;"
-               onmouseover="this.style.background='#5035a0';"
-               onmouseout="this.style.background='#3d2372';">
-               Enviar
+                onmouseover="this.style.background='#5035a0';"
+                onmouseout="this.style.background='#3d2372';">
+                Enviar
             </button>
         </div>
     </div>
@@ -443,22 +518,22 @@
             <div class="space-y-5">
                 @foreach($historial as $h)
                 @php
-                    $dotColors = [
-                        'nueva'       => '#3d1a8e',
-                        'en_revision' => '#f59e0b',
-                        'cotizada'    => '#10b981',
-                        'enviada'     => '#3b82f6',
-                        'rechazada'   => '#e8392a',
-                    ];
-                    $badgeColors = [
-                        'nueva'       => 'background-color:#ede9fe;color:#3d1a8e;',
-                        'en_revision' => 'background-color:#fef3c7;color:#92400e;',
-                        'cotizada'    => 'background-color:#d1fae5;color:#065f46;',
-                        'enviada'     => 'background-color:#dbeafe;color:#1e40af;',
-                        'rechazada'   => 'background-color:#fee2e2;color:#991b1b;',
-                    ];
-                    $dotColor   = $dotColors[$h->estado_nuevo]  ?? '#9ca3af';
-                    $badgeStyle = $badgeColors[$h->estado_nuevo] ?? 'background-color:#f3f4f6;color:#374151;';
+                $dotColors = [
+                'nueva' => '#3d1a8e',
+                'en_revision' => '#f59e0b',
+                'cotizada' => '#10b981',
+                'enviada' => '#3b82f6',
+                'rechazada' => '#e8392a',
+                ];
+                $badgeColors = [
+                'nueva' => 'background-color:#ede9fe;color:#3d1a8e;',
+                'en_revision' => 'background-color:#fef3c7;color:#92400e;',
+                'cotizada' => 'background-color:#d1fae5;color:#065f46;',
+                'enviada' => 'background-color:#dbeafe;color:#1e40af;',
+                'rechazada' => 'background-color:#fee2e2;color:#991b1b;',
+                ];
+                $dotColor = $dotColors[$h->estado_nuevo] ?? '#9ca3af';
+                $badgeStyle = $badgeColors[$h->estado_nuevo] ?? 'background-color:#f3f4f6;color:#374151;';
                 @endphp
                 <div class="relative flex gap-4 pl-9">
                     {{-- Dot --}}
