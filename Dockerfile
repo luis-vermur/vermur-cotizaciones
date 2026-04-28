@@ -38,10 +38,9 @@ RUN mkdir -p storage/framework/{sessions,views,cache,testing} \
     && chmod -R 777 storage bootstrap/cache
 
 # Cachear configuración
-RUN php artisan config:cache \
-    && php artisan route:cache \
+RUN php artisan route:cache \
     && php artisan view:cache
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan migrate --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["sh", "-c", "php artisan config:cache && php artisan migrate --force && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=8000"]
