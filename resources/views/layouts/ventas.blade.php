@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,8 +10,50 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        /* Barra de carga superior */
+        [wire\:loading] {
+            opacity: 0.6;
+        }
+
+        #loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3d1a8e, #e8392a);
+            z-index: 9999;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        #loading-bar.active {
+            width: 85%;
+            animation: loading-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes loading-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Spinner global de Livewire */
+        .livewire-loading-overlay {
+            display: none;
+        }
+    </style>
+
     @livewireStyles
 </head>
+
 <body style="background-color:#f8f7fc; font-family:'DM Sans',sans-serif; color:#1f103b;">
 
     {{-- Navbar — blanca con frosted glass, igual que vermur.com --}}
@@ -25,8 +68,8 @@
             {{-- Logo --}}
             <a href="/" style="flex-shrink:0; display:block;">
                 <img src="{{ asset('images/logotipo.png') }}"
-                     alt="Vermur"
-                     style="height:30px; width:auto; display:block;">
+                    alt="Vermur"
+                    style="height:30px; width:auto; display:block;">
             </a>
 
             @auth
@@ -35,12 +78,12 @@
                 {{-- Módulo activo --}}
                 <div style="display:flex; align-items:center; gap:.4rem;">
                     @php
-                        $rolLabel = match(auth()->user()->rol) {
-                            'ventas'  => 'Ventas',
-                            'pricing' => 'Pricing',
-                            'admin'   => 'Admin',
-                            default   => ucfirst(auth()->user()->rol),
-                        };
+                    $rolLabel = match(auth()->user()->rol) {
+                    'ventas' => 'Ventas',
+                    'pricing' => 'Pricing',
+                    'admin' => 'Admin',
+                    default => ucfirst(auth()->user()->rol),
+                    };
                     @endphp
                     <span style="font-size:.68rem; font-weight:700; letter-spacing:.18em;
                                  text-transform:uppercase; color:#9490b0;">Módulo</span>
@@ -61,8 +104,18 @@
                         {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
                     <span style="font-size:.875rem; font-weight:500; color:#1f103b; display:none;"
-                          class="sm-name">{{ auth()->user()->name }}</span>
-                    <style>.sm-name { display:none; } @media(min-width:640px){.sm-name{display:block;}}</style>
+                        class="sm-name">{{ auth()->user()->name }}</span>
+                    <style>
+                        .sm-name {
+                            display: none;
+                        }
+
+                        @media(min-width:640px) {
+                            .sm-name {
+                                display: block;
+                            }
+                        }
+                    </style>
                 </div>
 
                 {{-- Cerrar sesión --}}
@@ -90,24 +143,99 @@
         {{ $slot }}
     </main>
 
+
+    <div id="loading-bar"></div>
+
+    <script>
+        const bar = document.getElementById('loading-bar');
+
+        document.addEventListener('livewire:navigating', () => {
+            bar.style.width = '0%';
+            bar.classList.add('active');
+        });
+
+        document.addEventListener('livewire:navigated', () => {
+            bar.style.width = '100%';
+            bar.classList.remove('active');
+            setTimeout(() => {
+                bar.style.width = '0%';
+            }, 300);
+        });
+
+        // También para requests normales de Livewire
+        document.addEventListener('livewire:request', () => {
+            bar.classList.add('active');
+        });
+
+        document.addEventListener('livewire:response', () => {
+            bar.style.width = '100%';
+            bar.classList.remove('active');
+            setTimeout(() => {
+                bar.style.width = '0%';
+            }, 300);
+        });
+    </script>
+
+    <div id="loading-bar"></div>
+
+    <script>
+        const bar = document.getElementById('loading-bar');
+
+        document.addEventListener('livewire:navigating', () => {
+            bar.style.width = '0%';
+            bar.classList.add('active');
+        });
+
+        document.addEventListener('livewire:navigated', () => {
+            bar.style.width = '100%';
+            bar.classList.remove('active');
+            setTimeout(() => {
+                bar.style.width = '0%';
+            }, 300);
+        });
+
+        // También para requests normales de Livewire
+        document.addEventListener('livewire:request', () => {
+            bar.classList.add('active');
+        });
+
+        document.addEventListener('livewire:response', () => {
+            bar.style.width = '100%';
+            bar.classList.remove('active');
+            setTimeout(() => {
+                bar.style.width = '0%';
+            }, 300);
+        });
+    </script>
+
     @livewireScripts
     <script>
-    // Mostrar fechas/horas en la zona horaria del dispositivo del usuario
-    document.addEventListener('DOMContentLoaded', formatLocalTimes);
-    document.addEventListener('livewire:navigated', formatLocalTimes);
-    document.addEventListener('livewire:update', formatLocalTimes);
-    function formatLocalTimes() {
-        document.querySelectorAll('[data-ts]').forEach(el => {
-            const ts = el.dataset.ts;
-            if (!ts) return;
-            const d = new Date(ts);
-            if (isNaN(d)) return;
-            const opts = el.dataset.tsFormat === 'date'
-                ? { day: '2-digit', month: '2-digit', year: 'numeric' }
-                : { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-            el.textContent = d.toLocaleString('es-MX', opts);
-        });
-    }
+        // Mostrar fechas/horas en la zona horaria del dispositivo del usuario
+        document.addEventListener('DOMContentLoaded', formatLocalTimes);
+        document.addEventListener('livewire:navigated', formatLocalTimes);
+        document.addEventListener('livewire:update', formatLocalTimes);
+
+        function formatLocalTimes() {
+            document.querySelectorAll('[data-ts]').forEach(el => {
+                const ts = el.dataset.ts;
+                if (!ts) return;
+                const d = new Date(ts);
+                if (isNaN(d)) return;
+                const opts = el.dataset.tsFormat === 'date' ? {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                } : {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                el.textContent = d.toLocaleString('es-MX', opts);
+            });
+        }
     </script>
 </body>
+
 </html>
