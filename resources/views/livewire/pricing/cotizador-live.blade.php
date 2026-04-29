@@ -73,6 +73,7 @@
                            padding:.5rem .75rem; font-size:.875rem; font-family:'DM Sans',sans-serif; background:white;">
                         <option value="MXN">Nacional MXN</option>
                         <option value="USD">Internacional USD</option>
+                        <option value="FCL">Marítimo FCL</option>
                         <option value="LCL">Marítimo LCL</option>
                         <option value="terrestre">Terrestre</option>
                     </select>

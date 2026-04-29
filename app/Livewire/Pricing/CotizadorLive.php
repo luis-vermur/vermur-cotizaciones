@@ -41,6 +41,9 @@ class CotizadorLive extends Component
     // Líneas
     public array $lineas = [];
 
+    // Para plantilla terrestre
+    public array $unidades = []; // unidad por línea: Torton, Rabon, Full, etc.
+
     // Totales
     public float $costo_total          = 0;
     public float $profit_total         = 0;
@@ -103,6 +106,26 @@ class CotizadorLive extends Component
         'maniobra'             => 'Maniobra',
         'entrega'              => 'Entrega',
         'dias_transito'        => 'Días de tránsito',
+        'validez'              => 'Validez',
+    ];
+
+    const CONCEPTOS_FCL = [
+        'flete_internacional'  => 'Flete internacional',
+        't_pantaco'            => 'T. Pantaco',
+        'rail_pantaco'         => 'Rail Pantaco',
+        'ams'                  => 'AMS',
+        'doc_fee'              => 'Doc Fee',
+        'isps'                 => 'ISPS',
+        'bl_fee'               => 'BL Fee',
+        'validez'              => 'Validez',
+    ];
+
+    const CONCEPTOS_TERRESTRE = [
+        'flete'                => 'Flete',
+        'seguro'               => 'Seguro',
+        'maniobra_origen'      => 'Maniobra origen',
+        'maniobra_destino'     => 'Maniobra destino',
+        'despacho'             => 'Despacho',
         'validez'              => 'Validez',
     ];
 
@@ -191,6 +214,8 @@ class CotizadorLive extends Component
             'proveedor_id'     => $this->proveedor_global_id,
             'proveedor_nombre' => $nombreProveedor,
             'concepto'         => '',
+            'unidad'           => '',  
+            'ruta'             => '',  
             'costo'            => 0,
             'profit'           => 0,
             'venta'            => 0,
@@ -337,7 +362,12 @@ class CotizadorLive extends Component
 
         // Si es el primer agente, inicializar conceptos default
         if (count($this->agentes) === 1) {
-            foreach (self::CONCEPTOS_DEFAULT as $key => $label) {
+            $conceptos = match ($this->tipo_plantilla) {
+                'FCL'        => self::CONCEPTOS_FCL,
+                'terrestre'  => self::CONCEPTOS_TERRESTRE,
+                default      => self::CONCEPTOS_DEFAULT,
+            };
+            foreach ($conceptos as $key => $label) {
                 $this->tarifas[$key]   = [0 => null];
                 $this->etiquetas[$key] = $label;
             }
@@ -520,122 +550,125 @@ class CotizadorLive extends Component
         $this->lcl_total_iva = round($this->lcl_total_local + $this->lcl_iva, 2);
     }
 
-    public function updatedLclIvaPct() { $this->recalcularLcl(); }
+    public function updatedLclIvaPct()
+    {
+        $this->recalcularLcl();
+    }
 
     public function guardar()
     {
         try {
-        $this->recalcularTodo();
+            $this->recalcularTodo();
 
-        $solicitud = Solicitud::findOrFail($this->solicitudId);
+            $solicitud = Solicitud::findOrFail($this->solicitudId);
 
-        $totales = CotizacionCalculator::calcTotales(
-            $this->lineas,
-            $solicitud->dias_credito,
-            $this->costo_ope
-        );
-
-        $folioCoti = CotizacionCalculator::generarFolioCoti(
-            $this->solicitudId,
-            $this->version
-        );
-
-        // Guardar o actualizar cotización
-        $cotizacion = Cotizacion::updateOrCreate(
-            [
-                'solicitud_id' => $this->solicitudId,
-                'version'      => $this->version,
-            ],
-            [
-                'folio_coti'           => $folioCoti,
-                'tipo_plantilla'       => $this->tipo_plantilla,
-                'tc'                   => $this->tc ?: null,
-                'margen_deseado'       => $this->margen_deseado ?: null,
-                'costo_ope'            => $this->costo_ope,
-                'validez'              => $this->validez,
-                'notas'                => $this->notas,
-                'creado_por'           => auth()->id(),
-                'costo_total'          => $totales['costo_total'],
-                'profit_total'         => $totales['profit_total'],
-                'venta_total'          => $totales['venta_total'],
-                'margen_real'          => $totales['margen_real'],
-                'comision_pct'         => $totales['comision_pct'],
-                'comision_monto'       => $totales['comision_monto'],
-                'financiamiento_pct'   => $totales['financiamiento_pct'],
-                'financiamiento_monto' => $totales['financiamiento_monto'],
-                'profit_real_pct'      => $totales['profit_real_pct'],
-                'profit_real_monto'    => $totales['profit_real_monto'],
-                'ganancia_real'        => $totales['ganancia_real'],
-            ]
-        );
-
-        // Guardar líneas — eliminar y recrear
-        $cotizacion->lineas()->delete();
-
-        foreach ($this->lineas as $i => $linea) {
-            $calc = CotizacionCalculator::calcLinea(
-                floatval($linea['costo'] ?? 0),
-                floatval($linea['profit'] ?? 0)
+            $totales = CotizacionCalculator::calcTotales(
+                $this->lineas,
+                $solicitud->dias_credito,
+                $this->costo_ope
             );
-            LineaCotizacion::create([
-                'cotizacion_id'    => $cotizacion->id,
-                'proveedor_id'     => $linea['proveedor_id'] ?: null,
-                'proveedor_nombre' => $linea['proveedor_nombre'] ?? '',
-                'concepto'         => $linea['concepto'] ?? '',
-                'costo'            => floatval($linea['costo'] ?? 0),
-                'profit'           => floatval($linea['profit'] ?? 0),
-                'venta'            => $calc['venta'],
-                'margen'           => $calc['margen'],
-                'target'           => $linea['target'] ?: null,
-                'orden'            => $i,
-            ]);
-        }
 
-        // Guardar detalle LCL si aplica
-        if ($this->tipo_plantilla === 'LCL') {
-            $this->recalcularLcl();
-            CotizacionLclDetalle::updateOrCreate(
-                ['cotizacion_id' => $cotizacion->id],
+            $folioCoti = CotizacionCalculator::generarFolioCoti(
+                $this->solicitudId,
+                $this->version
+            );
+
+            // Guardar o actualizar cotización
+            $cotizacion = Cotizacion::updateOrCreate(
                 [
-                    'pol'              => $this->lcl_pol,
-                    'pod'              => $this->lcl_pod,
-                    'incoterm'         => $this->lcl_incoterm,
-                    'piezas'           => $this->lcl_piezas,
-                    'peso_tons'        => $this->lcl_peso_tons,
-                    'medidas_cbm'      => $this->lcl_medidas_cbm,
-                    'pickup'           => $this->lcl_pickup,
-                    'despacho_mxn'     => $this->lcl_despacho_mxn,
-                    'maniobras_mxn'    => $this->lcl_maniobras_mxn,
-                    'desconsolidacion' => $this->lcl_desconsolidacion,
-                    'transfer_fee'     => $this->lcl_transfer_fee,
-                    'revalidacion'     => $this->lcl_revalidacion,
-                    'transmision'      => $this->lcl_transmision,
-                    'admon_fee'        => $this->lcl_admon_fee,
-                    'recargo_imo'      => $this->lcl_recargo_imo,
-                    'total_local'      => $this->lcl_total_local,
-                    'iva_pct'          => $this->lcl_iva_pct,
-                    'iva'              => $this->lcl_iva,
-                    'total_iva'        => $this->lcl_total_iva,
+                    'solicitud_id' => $this->solicitudId,
+                    'version'      => $this->version,
+                ],
+                [
+                    'folio_coti'           => $folioCoti,
+                    'tipo_plantilla'       => $this->tipo_plantilla,
+                    'tc'                   => $this->tc ?: null,
+                    'margen_deseado'       => $this->margen_deseado ?: null,
+                    'costo_ope'            => $this->costo_ope,
+                    'validez'              => $this->validez,
+                    'notas'                => $this->notas,
+                    'creado_por'           => auth()->id(),
+                    'costo_total'          => $totales['costo_total'],
+                    'profit_total'         => $totales['profit_total'],
+                    'venta_total'          => $totales['venta_total'],
+                    'margen_real'          => $totales['margen_real'],
+                    'comision_pct'         => $totales['comision_pct'],
+                    'comision_monto'       => $totales['comision_monto'],
+                    'financiamiento_pct'   => $totales['financiamiento_pct'],
+                    'financiamiento_monto' => $totales['financiamiento_monto'],
+                    'profit_real_pct'      => $totales['profit_real_pct'],
+                    'profit_real_monto'    => $totales['profit_real_monto'],
+                    'ganancia_real'        => $totales['ganancia_real'],
                 ]
             );
-        }
 
-        // Cambiar estado de solicitud
-        if ($solicitud->puedeTransicionarA('cotizada')) {
-            $estadoAnterior = $solicitud->estado;
-            $solicitud->update(['estado' => 'cotizada']);
+            // Guardar líneas — eliminar y recrear
+            $cotizacion->lineas()->delete();
 
-            HistorialEstado::create([
-                'solicitud_id'    => $solicitud->id,
-                'estado_anterior' => $estadoAnterior,
-                'estado_nuevo'    => 'cotizada',
-                'user_id'         => auth()->id(),
-                'motivo'          => "Cotización guardada: {$folioCoti}",
-            ]);
-        }
+            foreach ($this->lineas as $i => $linea) {
+                $calc = CotizacionCalculator::calcLinea(
+                    floatval($linea['costo'] ?? 0),
+                    floatval($linea['profit'] ?? 0)
+                );
+                LineaCotizacion::create([
+                    'cotizacion_id'    => $cotizacion->id,
+                    'proveedor_id'     => $linea['proveedor_id'] ?: null,
+                    'proveedor_nombre' => $linea['proveedor_nombre'] ?? '',
+                    'concepto'         => $linea['concepto'] ?? '',
+                    'costo'            => floatval($linea['costo'] ?? 0),
+                    'profit'           => floatval($linea['profit'] ?? 0),
+                    'venta'            => $calc['venta'],
+                    'margen'           => $calc['margen'],
+                    'target'           => $linea['target'] ?: null,
+                    'orden'            => $i,
+                ]);
+            }
 
-        session()->flash('success', "Cotización {$folioCoti} guardada correctamente.");
-        return redirect()->route('pricing.dashboard');
+            // Guardar detalle LCL si aplica
+            if ($this->tipo_plantilla === 'LCL') {
+                $this->recalcularLcl();
+                CotizacionLclDetalle::updateOrCreate(
+                    ['cotizacion_id' => $cotizacion->id],
+                    [
+                        'pol'              => $this->lcl_pol,
+                        'pod'              => $this->lcl_pod,
+                        'incoterm'         => $this->lcl_incoterm,
+                        'piezas'           => $this->lcl_piezas,
+                        'peso_tons'        => $this->lcl_peso_tons,
+                        'medidas_cbm'      => $this->lcl_medidas_cbm,
+                        'pickup'           => $this->lcl_pickup,
+                        'despacho_mxn'     => $this->lcl_despacho_mxn,
+                        'maniobras_mxn'    => $this->lcl_maniobras_mxn,
+                        'desconsolidacion' => $this->lcl_desconsolidacion,
+                        'transfer_fee'     => $this->lcl_transfer_fee,
+                        'revalidacion'     => $this->lcl_revalidacion,
+                        'transmision'      => $this->lcl_transmision,
+                        'admon_fee'        => $this->lcl_admon_fee,
+                        'recargo_imo'      => $this->lcl_recargo_imo,
+                        'total_local'      => $this->lcl_total_local,
+                        'iva_pct'          => $this->lcl_iva_pct,
+                        'iva'              => $this->lcl_iva,
+                        'total_iva'        => $this->lcl_total_iva,
+                    ]
+                );
+            }
+
+            // Cambiar estado de solicitud
+            if ($solicitud->puedeTransicionarA('cotizada')) {
+                $estadoAnterior = $solicitud->estado;
+                $solicitud->update(['estado' => 'cotizada']);
+
+                HistorialEstado::create([
+                    'solicitud_id'    => $solicitud->id,
+                    'estado_anterior' => $estadoAnterior,
+                    'estado_nuevo'    => 'cotizada',
+                    'user_id'         => auth()->id(),
+                    'motivo'          => "Cotización guardada: {$folioCoti}",
+                ]);
+            }
+
+            session()->flash('success', "Cotización {$folioCoti} guardada correctamente.");
+            return redirect()->route('pricing.dashboard');
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('CotizadorLive::guardar', [
                 'error'        => $e->getMessage(),
@@ -710,9 +743,10 @@ class CotizadorLive extends Component
 
             if ($this->busquedaTarifasAnt) {
                 $busq = strtolower($this->busquedaTarifasAnt);
-                $registros = $registros->filter(fn($t) =>
+                $registros = $registros->filter(
+                    fn($t) =>
                     str_contains(strtolower($t->solicitud->folio ?? ''), $busq) ||
-                    str_contains(strtolower($t->solicitud->cliente_nombre ?? ''), $busq)
+                        str_contains(strtolower($t->solicitud->cliente_nombre ?? ''), $busq)
                 );
             }
 
