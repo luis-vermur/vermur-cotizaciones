@@ -35,7 +35,7 @@
                             <option value="{{ $c->id }}">{{ $c->nombre }}</option>
                             @endforeach
                         </select>
-                        <button type="button" wire:click="$toggle('mostrarCrearCliente', !$mostrarCrearCliente)"
+                        <button type="button" wire:click="$toggle('mostrarCrearCliente')"
                             style="white-space:nowrap; padding:.45rem 1rem; background:#3d2372; color:white;
                                    border:none; border-radius:.375rem; font-size:.8rem; font-weight:600; cursor:pointer;
                                    transition:background .2s;"
