@@ -8,6 +8,7 @@ use App\Models\Solicitud;
 use App\Models\Comentario;
 use App\Models\HistorialEstado;
 use App\Models\Adjunto;
+use App\Notifications\CotizacionEntregadaNotification;
 
 class VerSolicitud extends Component
 {
@@ -127,6 +128,9 @@ class VerSolicitud extends Component
         $estadoAnterior = $solicitud->estado;
         $solicitud->update(['estado' => 'enviada']);
 
+        // Notificar al vendedor que creó la solicitud
+        $solicitud->creadoPor?->notify(new CotizacionEntregadaNotification($solicitud));
+
         HistorialEstado::create([
             'solicitud_id'    => $solicitud->id,
             'estado_anterior' => $estadoAnterior,
@@ -149,7 +153,10 @@ class VerSolicitud extends Component
         $cotizaciones = $solicitud->cotizaciones->sortBy('version');
 
         return view('livewire.pricing.ver-solicitud', compact(
-            'solicitud', 'comentarios', 'historial', 'cotizaciones'
+            'solicitud',
+            'comentarios',
+            'historial',
+            'cotizaciones'
         ))->layout('layouts.ventas');
     }
 }

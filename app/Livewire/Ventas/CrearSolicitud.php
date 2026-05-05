@@ -11,6 +11,9 @@ use App\Models\Pallet;
 use App\Models\HistorialEstado;
 use App\Services\CotizacionCalculator;
 use Livewire\WithFileUploads;
+use App\Notifications\NuevaSolicitudNotification;
+use Illuminate\Support\Facades\Notification;
+
 
 
 class CrearSolicitud extends Component
@@ -164,6 +167,7 @@ class CrearSolicitud extends Component
             'estado'            => 'nueva',
         ]);
 
+
         $folio = CotizacionCalculator::generarFolio($solicitud->id);
         $solicitud->update(['folio' => $folio]);
 
@@ -174,6 +178,8 @@ class CrearSolicitud extends Component
             'user_id'         => auth()->id(),
             'motivo'          => 'Solicitud creada por Ventas',
         ]);
+
+
 
         session()->flash('success', "Solicitud {$folio} creada correctamente.");
 
@@ -212,6 +218,9 @@ class CrearSolicitud extends Component
                 'cubicaje_m3'  => $pallet['cubicaje_m3'] ?: null,
             ]);
         }
+
+        $equipoPricing = User::where('rol', 'pricing')->get();
+        Notification::send($equipoPricing, new NuevaSolicitudNotification($solicitud));
 
         return redirect()->route('ventas.dashboard');
     }
@@ -286,37 +295,37 @@ class CrearSolicitud extends Component
 
 
     public function copiarPrimerPallet()
-{
-    if (count($this->pallets) < 2) return;
+    {
+        if (count($this->pallets) < 2) return;
 
-    $primero = $this->pallets[0];
-    $total   = count($this->pallets);
+        $primero = $this->pallets[0];
+        $total   = count($this->pallets);
 
-    // Reconstruir el array completo desde cero
-    $nuevos = [];
-    for ($i = 0; $i < $total; $i++) {
-        $nuevos[] = [
-            'numero'      => $i + 1,
-            'largo_cm'    => $primero['largo_cm'],
-            'ancho_cm'    => $primero['ancho_cm'],
-            'alto_cm'     => $primero['alto_cm'],
-            'peso'        => $primero['peso'],
-            'peso_unidad' => $primero['peso_unidad'],
-            'cubicaje_m3' => $primero['cubicaje_m3'],
-        ];
+        // Reconstruir el array completo desde cero
+        $nuevos = [];
+        for ($i = 0; $i < $total; $i++) {
+            $nuevos[] = [
+                'numero'      => $i + 1,
+                'largo_cm'    => $primero['largo_cm'],
+                'ancho_cm'    => $primero['ancho_cm'],
+                'alto_cm'     => $primero['alto_cm'],
+                'peso'        => $primero['peso'],
+                'peso_unidad' => $primero['peso_unidad'],
+                'cubicaje_m3' => $primero['cubicaje_m3'],
+            ];
+        }
+
+        // Reemplazar el array completo — fuerza re-render de Livewire
+        $this->pallets = [];
+        $this->pallets = $nuevos;
+
+        $this->lcl_cubicaje_total = round(
+            collect($this->pallets)->sum(fn($p) => floatval($p['cubicaje_m3'] ?? 0)),
+            4
+        );
+
+        $this->palletsVersion++;
     }
-
-    // Reemplazar el array completo — fuerza re-render de Livewire
-    $this->pallets = [];
-    $this->pallets = $nuevos;
-
-    $this->lcl_cubicaje_total = round(
-        collect($this->pallets)->sum(fn ($p) => floatval($p['cubicaje_m3'] ?? 0)),
-        4
-    );
-    
-    $this->palletsVersion++;
-}
 
     public function render()
     {
