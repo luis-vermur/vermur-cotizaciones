@@ -219,8 +219,12 @@ class CrearSolicitud extends Component
             ]);
         }
 
-        $equipoPricing = User::where('rol', 'pricing')->get();
-        Notification::send($equipoPricing, new NuevaSolicitudNotification($solicitud));
+        try {
+            $equipoPricing = User::where('rol', 'pricing')->get();
+            Notification::send($equipoPricing, new NuevaSolicitudNotification($solicitud));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error enviando notificación: ' . $e->getMessage());
+        }
 
         return redirect()->route('ventas.dashboard');
     }
