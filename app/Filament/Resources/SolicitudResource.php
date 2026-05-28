@@ -297,12 +297,12 @@ class SolicitudResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                     ->visible(fn() => auth()->user()->rol === 'admin'),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn() => auth()->user()->rol === 'admin'),
             ])
-
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                        ->visible(fn() => auth()->user()->rol === 'admin'),
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
