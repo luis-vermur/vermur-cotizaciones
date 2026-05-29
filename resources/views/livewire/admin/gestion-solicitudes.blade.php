@@ -44,11 +44,11 @@
     {{-- Tabla --}}
     @php
     $estadoBadge = [
-        'nueva'       => 'background:#ede9fe;color:#3d1a8e;',
-        'en_revision' => 'background:#fef3c7;color:#92400e;',
-        'cotizada'    => 'background:#d1fae5;color:#065f46;',
-        'enviada'     => 'background:#dbeafe;color:#1e40af;',
-        'rechazada'   => 'background:#fee2e2;color:#991b1b;',
+    'nueva' => 'background:#ede9fe;color:#3d1a8e;',
+    'en_revision' => 'background:#fef3c7;color:#92400e;',
+    'cotizada' => 'background:#d1fae5;color:#065f46;',
+    'enviada' => 'background:#dbeafe;color:#1e40af;',
+    'rechazada' => 'background:#fee2e2;color:#991b1b;',
     ];
     $estadoLabel = ['nueva'=>'Nueva','en_revision'=>'En revisión','cotizada'=>'Cotizada','enviada'=>'Enviada','rechazada'=>'Rechazada'];
     @endphp
@@ -74,9 +74,9 @@
                     onmouseout="this.style.background='';">
                     <td style="padding:.7rem 1.25rem;">
                         <a href="{{ route('pricing.solicitud', $sol->id) }}"
-                           style="font-family:monospace; font-weight:700; color:#3d2372; font-size:.82rem; text-decoration:none;"
-                           onmouseover="this.style.textDecoration='underline';"
-                           onmouseout="this.style.textDecoration='none';">
+                            style="font-family:monospace; font-weight:700; color:#3d2372; font-size:.82rem; text-decoration:none;"
+                            onmouseover="this.style.textDecoration='underline';"
+                            onmouseout="this.style.textDecoration='none';">
                             {{ $sol->folio }}
                         </a>
                     </td>
@@ -98,6 +98,13 @@
                                    font-size:.75rem; color:#3d2372; background:white; cursor:pointer; font-family:'DM Sans',sans-serif;"
                             onmouseover="this.style.background='#f0ecf8';" onmouseout="this.style.background='white';">
                             Gestionar
+                        </button>
+                        <button wire:click="eliminarSolicitud({{ $sol->id }})"
+                            wire:confirm="¿Eliminar esta solicitud? Esta acción no se puede deshacer."
+                            style="padding:.3rem .75rem; border:1px solid rgba(205,53,41,0.3); border-radius:4px;
+                                font-size:.75rem; color:#cd3529; background:white; cursor:pointer; font-family:'DM Sans',sans-serif;"
+                            onmouseover="this.style.background='#fff5f5';" onmouseout="this.style.background='white';">
+                            Eliminar
                         </button>
                     </td>
                 </tr>

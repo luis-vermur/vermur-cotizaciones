@@ -28,8 +28,14 @@ class GestionSolicitudes extends Component
         if (auth()->user()->rol !== 'admin') abort(403);
     }
 
-    public function updatedBusqueda()    { $this->resetPage(); }
-    public function updatedFiltroEstado(){ $this->resetPage(); }
+    public function updatedBusqueda()
+    {
+        $this->resetPage();
+    }
+    public function updatedFiltroEstado()
+    {
+        $this->resetPage();
+    }
 
     public function abrirGestionar(int $id)
     {
@@ -70,12 +76,19 @@ class GestionSolicitudes extends Component
         session()->flash('success', "Solicitud {$sol->folio} actualizada.");
     }
 
+    public function eliminarSolicitud(int $id): void
+    {
+        $solicitud = \App\Models\Solicitud::findOrFail($id);
+        $solicitud->delete();
+        session()->flash('success', 'Solicitud eliminada correctamente.');
+    }
+
     public function render()
     {
         $solicitudes = Solicitud::with(['creadoPor', 'asignadoA'])
             ->when($this->busqueda, fn($q) => $q->where(function ($q) {
                 $q->where('folio', 'like', "%{$this->busqueda}%")
-                  ->orWhere('cliente_nombre', 'like', "%{$this->busqueda}%");
+                    ->orWhere('cliente_nombre', 'like', "%{$this->busqueda}%");
             }))
             ->when($this->filtroEstado,    fn($q) => $q->where('estado', $this->filtroEstado))
             ->when($this->filtroTransporte, fn($q) => $q->where('tipo_transporte', $this->filtroTransporte))
