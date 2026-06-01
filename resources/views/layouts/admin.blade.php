@@ -71,11 +71,12 @@
 
             @php
             $navItems = [
-                ['route' => 'admin.dashboard',   'label' => 'Dashboard',    'icon' => '▤'],
-                ['route' => 'admin.solicitudes',  'label' => 'Solicitudes',  'icon' => '📋'],
-                ['route' => 'admin.clientes',     'label' => 'Clientes',     'icon' => '🏢'],
-                ['route' => 'admin.proveedores',  'label' => 'Proveedores',  'icon' => '🚚'],
-                ['route' => 'admin.usuarios',     'label' => 'Usuarios',     'icon' => '👥'],
+                ['route' => 'admin.dashboard',        'label' => 'Dashboard',        'icon' => '▤'],
+                ['route' => 'admin.solicitudes',       'label' => 'Solicitudes',      'icon' => '📋'],
+                ['route' => 'admin.mis-solicitudes',   'label' => 'Mis Solicitudes',  'icon' => '📝'],
+                ['route' => 'admin.clientes',          'label' => 'Clientes',         'icon' => '🏢'],
+                ['route' => 'admin.proveedores',       'label' => 'Proveedores',      'icon' => '🚚'],
+                ['route' => 'admin.usuarios',          'label' => 'Usuarios',         'icon' => '👥'],
             ];
             @endphp
 
@@ -84,7 +85,7 @@
                            text-transform:uppercase; color:#cdc9e8; padding:0 .5rem; margin-bottom:.25rem;">
                     General
                 </p>
-                @foreach(array_slice($navItems, 0, 2) as $item)
+                @foreach(array_slice($navItems, 0, 3) as $item)
                 @php $active = request()->routeIs($item['route']); @endphp
                 <a href="{{ route($item['route']) }}"
                    style="display:flex; align-items:center; gap:.65rem; padding:.55rem .75rem;
@@ -110,7 +111,7 @@
                            text-transform:uppercase; color:#cdc9e8; padding:0 .5rem; margin-bottom:.25rem;">
                     Catálogos
                 </p>
-                @foreach(array_slice($navItems, 2, 2) as $item)
+                @foreach(array_slice($navItems, 3, 2) as $item)
                 @php $active = request()->routeIs($item['route']); @endphp
                 <a href="{{ route($item['route']) }}"
                    style="display:flex; align-items:center; gap:.65rem; padding:.55rem .75rem;
@@ -136,7 +137,7 @@
                            text-transform:uppercase; color:#cdc9e8; padding:0 .5rem; margin-bottom:.25rem;">
                     Sistema
                 </p>
-                @foreach(array_slice($navItems, 4) as $item)
+                @foreach(array_slice($navItems, 5) as $item)
                 @php $active = request()->routeIs($item['route']); @endphp
                 <a href="{{ route($item['route']) }}"
                    style="display:flex; align-items:center; gap:.65rem; padding:.55rem .75rem;

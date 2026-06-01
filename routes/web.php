@@ -41,8 +41,9 @@ Route::prefix('supervisor')->name('supervisor.')->middleware(['auth'])->group(fu
 
 // Módulo Admin
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    Route::get('/dashboard',   \App\Livewire\Admin\DashboardAdmin::class)->name('dashboard');
-    Route::get('/solicitudes', \App\Livewire\Admin\GestionSolicitudes::class)->name('solicitudes');
+    Route::get('/dashboard',        \App\Livewire\Admin\DashboardAdmin::class)->name('dashboard');
+    Route::get('/solicitudes',      \App\Livewire\Admin\GestionSolicitudes::class)->name('solicitudes');
+    Route::get('/mis-solicitudes',  \App\Livewire\Admin\MisSolicitudes::class)->name('mis-solicitudes');
     Route::get('/usuarios',    \App\Livewire\Admin\GestionUsuarios::class)->name('usuarios');
     Route::get('/clientes',    \App\Livewire\Admin\GestionClientes::class)->name('clientes');
     Route::get('/proveedores', \App\Livewire\Admin\GestionProveedores::class)->name('proveedores');
