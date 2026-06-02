@@ -90,6 +90,12 @@ class CrearSolicitud extends Component
     public $ter_volumen     = '';
     public $ter_estibable   = false;
 
+    public function updatedTipoTransporte()
+    {
+        // Resetear tipo de embarque al cambiar el transporte
+        $this->tipo_embarque = 'ninguno';
+    }
+
     public function updatedClienteId($value)
     {
         $cliente = Cliente::find($value);
