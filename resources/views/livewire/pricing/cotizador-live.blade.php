@@ -572,6 +572,78 @@
     </div>
     @endif {{-- /pricing only --}}
 
+    {{-- Campos específicos Terrestre --}}
+    @if($solicitud->tipo_transporte === 'terrestre' && ($solicitud->ter_tipo || $solicitud->ter_mercancia))
+    <div class="vcard" style="padding:1.25rem 1.5rem;">
+        <div class="v-section-header">Detalle de embarque terrestre</div>
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem;">
+            <style>@media(min-width:768px){.ter-grid{grid-template-columns:repeat(4,1fr)!important;}}</style>
+            <div class="ter-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; grid-column:1/-1;">
+
+                @if($solicitud->ter_tipo)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Tipo</label>
+                    <p style="font-size:.9rem; font-weight:700; color:#3d2372;">
+                        {{ $solicitud->ter_tipo }}
+                        @if($solicitud->ter_unidad) — {{ $solicitud->ter_unidad }} @endif
+                    </p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_mercancia)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Mercancía</label>
+                    <p style="font-size:.875rem; color:#1f103b;">{{ $solicitud->ter_mercancia }}</p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_num_pallets)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Pallets</label>
+                    <p style="font-size:.875rem; color:#1f103b;">{{ $solicitud->ter_num_pallets }}</p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_peso)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Peso</label>
+                    <p style="font-size:.875rem; color:#1f103b;">{{ $solicitud->ter_peso }} {{ $solicitud->ter_peso_unidad }}</p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_medidas)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Medidas x pallet</label>
+                    <p style="font-size:.875rem; color:#1f103b;">{{ $solicitud->ter_medidas }}</p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_volumen)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Volumen</label>
+                    <p style="font-size:.875rem; color:#1f103b;">{{ $solicitud->ter_volumen }} CBM</p>
+                </div>
+                @endif
+
+                @if($solicitud->ter_estibable)
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                                   letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Estibable</label>
+                    <p style="font-size:.875rem; color:#059669; font-weight:600;">✓ Sí</p>
+                </div>
+                @endif
+
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Campos específicos LCL --}}
     @if($solicitud->tipo_embarque === 'LCL')
     <div class="vcard" style="padding:1.25rem 1.5rem;">

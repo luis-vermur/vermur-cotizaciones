@@ -85,6 +85,11 @@ class CrearCotizacionDirecta extends Component
         ];
     }
 
+    public function updatedTipoTransporte()
+    {
+        $this->tipo_embarque = 'ninguno';
+    }
+
     public function updatedClienteId($value)
     {
         $cliente = Cliente::find($value);

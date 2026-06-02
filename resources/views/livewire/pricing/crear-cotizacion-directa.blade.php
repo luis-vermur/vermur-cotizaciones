@@ -165,11 +165,11 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo</label>
                     <div class="flex gap-6">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" wire:model.live="ter_tipo" value="FTL" style="accent-color:#3d2372;">
+                            <input type="radio" name="ter_tipo" wire:model.live="ter_tipo" value="FTL" style="accent-color:#3d2372;">
                             <span class="text-sm font-medium text-gray-700">FTL (carga completa)</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" wire:model.live="ter_tipo" value="LTL" style="accent-color:#3d2372;">
+                            <input type="radio" name="ter_tipo" wire:model.live="ter_tipo" value="LTL" style="accent-color:#3d2372;">
                             <span class="text-sm font-medium text-gray-700">LTL (carga consolidada)</span>
                         </label>
                     </div>
@@ -246,7 +246,7 @@
             <div class="flex gap-6 mb-4">
                 @foreach(['ninguno'=>'Ninguno','FCL'=>'FCL','LCL'=>'LCL'] as $val=>$label)
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" wire:model.live="tipo_embarque" value="{{ $val }}" style="accent-color:#3d2372;">
+                    <input type="radio" name="tipo_embarque" wire:model.live="tipo_embarque" value="{{ $val }}" style="accent-color:#3d2372;">
                     <span class="text-sm font-medium text-gray-700">{{ $label }}</span>
                 </label>
                 @endforeach
