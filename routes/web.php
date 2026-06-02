@@ -19,6 +19,7 @@ Route::get('/', function () {
 // Módulo Pricing
 Route::prefix('pricing')->name('pricing.')->middleware(['auth'])->group(function () {
     Route::get('/dashboard', \App\Livewire\Pricing\DashboardPricing::class)->name('dashboard');
+    Route::get('/nueva-cotizacion', \App\Livewire\Pricing\CrearCotizacionDirecta::class)->name('nueva-cotizacion');
     Route::get('/solicitud/{solicitud}', \App\Livewire\Pricing\VerSolicitud::class)->name('solicitud');
     Route::get('/cotizador/{solicitud}', \App\Livewire\Pricing\CotizadorLive::class)->name('cotizador');
 });

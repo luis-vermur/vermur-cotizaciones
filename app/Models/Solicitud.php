@@ -23,6 +23,8 @@ class Solicitud extends Model
         'fcl_food_grade', 'fcl_reforzado', 'fcl_sobredimension',
         'fcl_enlonado', 'fcl_atmos_controlada',
         'lcl_num_pallets', 'lcl_estibable', 'lcl_cubicaje_total',
+        'ter_tipo', 'ter_unidad', 'ter_mercancia', 'ter_num_pallets',
+        'ter_peso', 'ter_peso_unidad', 'ter_medidas', 'ter_volumen', 'ter_estibable',
         'nota_interna', 'estado',
     ];
 
@@ -40,6 +42,7 @@ class Solicitud extends Model
         'fcl_enlonado'         => 'boolean',
         'fcl_atmos_controlada' => 'boolean',
         'lcl_estibable'        => 'boolean',
+        'ter_estibable'        => 'boolean',
     ];
 
     // Estados válidos

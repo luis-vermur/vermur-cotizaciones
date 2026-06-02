@@ -13,6 +13,17 @@
             </p>
         </div>
 
+        <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+            <a href="{{ route('pricing.nueva-cotizacion') }}"
+               style="display:inline-flex; align-items:center; gap:.45rem;
+                      padding:.65rem 1.4rem; background:#cd3529; color:white;
+                      border-radius:4px; font-size:.875rem; font-weight:700;
+                      letter-spacing:.04em; text-decoration:none; white-space:nowrap;"
+               onmouseover="this.style.background='#e04a3e';"
+               onmouseout="this.style.background='#cd3529';">
+                + Nueva cotización
+            </a>
+
         {{-- Recuadro TC --}}
         <div style="background:linear-gradient(135deg,#1f103b,#3d2372); border-radius:10px;
                     padding:.9rem 1.25rem; display:flex; flex-direction:column; align-items:flex-end; min-width:150px;">
@@ -26,6 +37,7 @@
                 {{ $tc ? 'Banxico · ' . $tc->actualizado_en->format('d/m/Y') : 'Sin datos' }}
             </p>
         </div>
+        </div>{{-- /flex wrapper --}}
     </div>
 
     {{-- Stats --}}
