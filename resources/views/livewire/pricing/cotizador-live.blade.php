@@ -80,6 +80,23 @@
                 </div>
                 <div>
                     <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
+                               letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">Moneda de cotización</label>
+                    <div style="display:flex; gap:.5rem;">
+                        @foreach(['MXN' => '🇲🇽 MXN', 'USD' => '🇺🇸 USD'] as $val => $label)
+                        <label style="flex:1; display:flex; align-items:center; justify-content:center; gap:.4rem;
+                                      padding:.5rem; border-radius:4px; cursor:pointer; font-size:.85rem; font-weight:600;
+                                      border:1.5px solid {{ $moneda === $val ? '#3d2372' : 'rgba(61,35,114,0.2)' }};
+                                      background:{{ $moneda === $val ? '#f0ecf8' : 'white' }};
+                                      color:{{ $moneda === $val ? '#3d2372' : '#9490b0' }};
+                                      transition:all .15s;">
+                            <input type="radio" wire:model.live="moneda" value="{{ $val }}" style="display:none;">
+                            {{ $label }}
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block; font-size:.72rem; font-weight:600; color:#9490b0;
                                letter-spacing:.08em; text-transform:uppercase; margin-bottom:.3rem;">TC (Tipo de cambio)</label>
                     <input wire:model.live="tc" type="number" step="0.01"
                         style="width:100%; border:1px solid rgba(61,35,114,0.2); border-radius:4px;

@@ -249,6 +249,13 @@ class CotizadorLive extends Component
         $this->recalcularTodo();
     }
 
+    public function updatedTipoPlantilla()
+    {
+        // Sincronizar moneda automáticamente según la plantilla seleccionada
+        $this->moneda = $this->monedaDerivada($this->tipo_plantilla);
+        $this->recalcularTodo();
+    }
+
     public function updatedCostoOpe()
     {
         $this->recalcularTodo();

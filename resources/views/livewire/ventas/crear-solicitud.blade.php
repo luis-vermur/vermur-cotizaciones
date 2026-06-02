@@ -298,13 +298,15 @@
         <div class="vcard" style="padding:1.5rem;">
             <div class="v-section-header">Tipo de embarque</div>
 
-            <div class="flex gap-6 mb-4">
+            <div class="flex gap-6 mb-4 flex-wrap">
                 @foreach(['ninguno' => 'Ninguno', 'FCL' => 'FCL', 'LCL' => 'LCL'] as $val => $label)
+                @if($tipo_transporte !== 'terrestre')
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="tipo_embarque" wire:model.live="tipo_embarque" value="{{ $val }}"
                         style="accent-color: #3d2372;">
                     <span class="text-sm font-medium text-gray-700">{{ $label }}</span>
                 </label>
+                @endif
                 @endforeach
             </div>
 
@@ -565,6 +567,99 @@
 
             </div>
             @endif
+
+            {{-- TERRESTRE --}}
+            @if($tipo_transporte === 'terrestre')
+            <div class="space-y-4">
+
+                {{-- Tipo: FTL / LTL --}}
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de embarque terrestre</label>
+                    <div class="flex gap-6">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" wire:model.live="ter_tipo" value="FTL" style="accent-color:#3d2372;">
+                            <span class="text-sm font-medium text-gray-700">FTL (carga completa)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" wire:model.live="ter_tipo" value="LTL" style="accent-color:#3d2372;">
+                            <span class="text-sm font-medium text-gray-700">LTL (carga consolidada)</span>
+                        </label>
+                    </div>
+                </div>
+
+                {{-- Tipo de unidad según FTL/LTL --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de unidad</label>
+                    <select wire:model="ter_unidad"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                        <option value="">Seleccionar...</option>
+                        @if($ter_tipo === 'FTL')
+                            <option value="Caja 53'">Caja 53'</option>
+                            <option value="Caja 48'">Caja 48'</option>
+                            <option value="Plataforma 40'">Plataforma 40'</option>
+                        @else
+                            <option value="Nissan">Nissan</option>
+                            <option value="Torton">Torton</option>
+                            <option value="Camioneta 3.5T">Camioneta 3.5T</option>
+                        @endif
+                    </select>
+                </div>
+
+                {{-- Mercancía --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de mercancía</label>
+                    <input wire:model="ter_mercancia" type="text"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        placeholder="Ej. Motores eléctricos, autopartes...">
+                </div>
+
+                {{-- Pallets / Peso / Medidas / Volumen --}}
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Núm. pallets</label>
+                        <input wire:model="ter_num_pallets" type="number" min="1"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Ej. 15">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso</label>
+                        <div class="flex gap-1">
+                            <input wire:model="ter_peso" type="number" step="0.01"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                placeholder="0.00">
+                            <select wire:model="ter_peso_unidad"
+                                class="border border-gray-300 rounded-lg px-2 py-2 text-sm">
+                                <option value="kg">kg</option>
+                                <option value="ton">ton</option>
+                                <option value="lb">lb</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Medidas x pallet</label>
+                        <input wire:model="ter_medidas" type="text"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Ej. 1.20 x 1.0 x 1.15">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Volumen (CBM)</label>
+                        <input wire:model="ter_volumen" type="number" step="0.0001"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            placeholder="0.00">
+                    </div>
+                </div>
+
+                {{-- Estibable --}}
+                <div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" wire:model="ter_estibable" style="accent-color:#3d2372;">
+                        <span class="text-sm font-medium text-gray-700">Estibable</span>
+                    </label>
+                </div>
+
+            </div>
+            @endif
+
         </div>
 
         {{-- Botones --}}

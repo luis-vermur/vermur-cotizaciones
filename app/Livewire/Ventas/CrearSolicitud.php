@@ -79,6 +79,17 @@ class CrearSolicitud extends Component
     public $lcl_cubicaje_total = '';
     public int $palletsVersion = 0;
 
+    // Terrestre
+    public $ter_tipo        = 'FTL';  // FTL | LTL
+    public $ter_unidad      = '';
+    public $ter_mercancia   = '';
+    public $ter_num_pallets = '';
+    public $ter_peso        = '';
+    public $ter_peso_unidad = 'kg';
+    public $ter_medidas     = '';
+    public $ter_volumen     = '';
+    public $ter_estibable   = false;
+
     public function updatedClienteId($value)
     {
         $cliente = Cliente::find($value);
@@ -164,6 +175,15 @@ class CrearSolicitud extends Component
             'lcl_num_pallets'   => $this->lcl_num_pallets ?: null,
             'lcl_estibable'     => $this->lcl_estibable,
             'lcl_cubicaje_total' => $this->lcl_cubicaje_total ?: null,
+            'ter_tipo'          => $this->tipo_transporte === 'terrestre' ? $this->ter_tipo : null,
+            'ter_unidad'        => $this->ter_unidad ?: null,
+            'ter_mercancia'     => $this->ter_mercancia ?: null,
+            'ter_num_pallets'   => $this->ter_num_pallets ?: null,
+            'ter_peso'          => $this->ter_peso ?: null,
+            'ter_peso_unidad'   => $this->ter_peso_unidad ?: null,
+            'ter_medidas'       => $this->ter_medidas ?: null,
+            'ter_volumen'       => $this->ter_volumen ?: null,
+            'ter_estibable'     => $this->ter_estibable,
             'estado'            => 'nueva',
         ]);
 
