@@ -1,13 +1,29 @@
 <div class="space-y-6">
 
     {{-- Header --}}
-    <div>
-        <h1 style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em; color:#3d2372; line-height:1;">
-            Dashboard
-        </h1>
-        <p style="font-size:.82rem; color:#9490b0; margin-top:.2rem;">
-            Resumen general del sistema · {{ now()->format('d/m/Y') }}
-        </p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+        <div>
+            <h1 style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em; color:#3d2372; line-height:1;">
+                Dashboard
+            </h1>
+            <p style="font-size:.82rem; color:#9490b0; margin-top:.2rem;">
+                Resumen general del sistema · {{ now()->format('d/m/Y') }}
+            </p>
+        </div>
+
+        {{-- Recuadro TC --}}
+        <div style="background:linear-gradient(135deg,#1f103b,#3d2372); border-radius:10px;
+                    padding:.9rem 1.25rem; display:flex; flex-direction:column; align-items:flex-end; min-width:150px;">
+            <p style="font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+                       color:rgba(255,255,255,0.45); margin-bottom:.25rem;">USD / MXN</p>
+            <p style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em;
+                       color:white; line-height:1;">
+                ${{ $stats['tc'] ? number_format($stats['tc'], 4) : '—' }}
+            </p>
+            <p style="font-size:.62rem; color:rgba(255,255,255,0.35); margin-top:.2rem;">
+                {{ $stats['tc_fecha'] ? 'Banxico · ' . $stats['tc_fecha']->format('d/m/Y') : 'Sin datos' }}
+            </p>
+        </div>
     </div>
 
     {{-- KPIs fila 1 --}}
@@ -20,7 +36,7 @@
             ['label'=>'Solicitudes total',  'value'=>$stats['solicitudes_total'],  'sub'=>'+'.$stats['solicitudes_mes'].' este mes', 'color'=>'#3d2372', 'bg'=>'#ede9fe'],
             ['label'=>'Cotizaciones',        'value'=>$stats['cotizaciones_total'], 'sub'=>'generadas en total',                      'color'=>'#1e40af', 'bg'=>'#dbeafe'],
             ['label'=>'Clientes',            'value'=>$stats['clientes'],           'sub'=>$stats['proveedores'].' proveedores activos','color'=>'#065f46','bg'=>'#d1fae5'],
-            ['label'=>'Usuarios activos',    'value'=>$stats['usuarios_activos'],   'sub'=>'en el sistema',                            'color'=>'#92400e','bg'=>'#fef3c7'],
+            ['label'=>'TC USD/MXN',          'value'=>'$'.number_format($stats['tc'],4), 'sub'=>$stats['tc_fecha'] ? 'Actualizado '.$stats['tc_fecha']->format('d/m/Y H:i') : 'Sin datos', 'color'=>'#92400e','bg'=>'#fef3c7'],
         ];
         @endphp
 
@@ -40,26 +56,92 @@
 
     {{-- KPIs financieros --}}
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-        <div style="background:linear-gradient(135deg,#1f103b,#3d2372); border-radius:12px; padding:1.5rem;
-                    display:flex; align-items:center; justify-content:space-between;">
-            <div>
+
+        {{-- Ventas del mes --}}
+        <div style="background:linear-gradient(135deg,#1f103b,#3d2372); border-radius:12px; padding:1.5rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem;">
                 <p style="font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-                           color:rgba(255,255,255,0.45); margin-bottom:.4rem;">Ventas del mes</p>
-                <p style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em;
-                           color:white; line-height:1;">${{ number_format($stats['ventas_mes'], 0) }}</p>
+                           color:rgba(255,255,255,0.45);">Ventas del mes</p>
+                <span style="font-size:1.75rem; opacity:.3;">💰</span>
             </div>
-            <span style="font-size:2.5rem; opacity:.3;">💰</span>
+            <div style="display:flex; flex-direction:column; gap:.3rem;">
+                <div style="display:flex; align-items:baseline; gap:.5rem;">
+                    <span style="font-size:.65rem; font-weight:700; color:rgba(255,255,255,0.5); width:2.5rem;">MXN</span>
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; color:white; line-height:1;">
+                        ${{ number_format($stats['ventas_mxn'], 0) }}
+                    </p>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:.5rem;">
+                    <span style="font-size:.65rem; font-weight:700; color:rgba(255,255,255,0.5); width:2.5rem;">USD</span>
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; color:#a5b4fc; line-height:1;">
+                        ${{ number_format($stats['ventas_usd'], 0) }}
+                    </p>
+                </div>
+                <div style="height:1px; background:rgba(255,255,255,0.1); margin:.2rem 0;"></div>
+                <p style="font-size:.72rem; color:rgba(255,255,255,0.4);">
+                    Total equivalente: ${{ number_format($stats['ventas_total_mxn'], 0) }} MXN
+                </p>
+            </div>
         </div>
-        <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:1.5rem;
-                    display:flex; align-items:center; justify-content:space-between;">
-            <div>
+
+        {{-- Ganancia del mes --}}
+        <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:1.5rem;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem;">
                 <p style="font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-                           color:rgba(255,255,255,0.45); margin-bottom:.4rem;">Ganancia real del mes</p>
-                <p style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em;
-                           color:white; line-height:1;">${{ number_format($stats['ganancia_mes'], 0) }}</p>
+                           color:rgba(255,255,255,0.45);">Ganancia real del mes</p>
+                <span style="font-size:1.75rem; opacity:.3;">📈</span>
             </div>
-            <span style="font-size:2.5rem; opacity:.3;">📈</span>
+            <div style="display:flex; flex-direction:column; gap:.3rem;">
+                <div style="display:flex; align-items:baseline; gap:.5rem;">
+                    <span style="font-size:.65rem; font-weight:700; color:rgba(255,255,255,0.5); width:2.5rem;">MXN</span>
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; color:white; line-height:1;">
+                        ${{ number_format($stats['ganancia_mxn'], 0) }}
+                    </p>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:.5rem;">
+                    <span style="font-size:.65rem; font-weight:700; color:rgba(255,255,255,0.5); width:2.5rem;">USD</span>
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.04em; color:#a7f3d0; line-height:1;">
+                        ${{ number_format($stats['ganancia_usd'], 0) }}
+                    </p>
+                </div>
+                <div style="height:1px; background:rgba(255,255,255,0.1); margin:.2rem 0;"></div>
+                <p style="font-size:.72rem; color:rgba(255,255,255,0.4);">
+                    Total equivalente: ${{ number_format($stats['ganancia_total_mxn'], 0) }} MXN
+                </p>
+            </div>
         </div>
+
+    </div>
+
+    {{-- Ejecutivos de Pricing --}}
+    <div style="background:white; border-radius:12px; padding:1.5rem;
+                border:1px solid rgba(61,35,114,0.08); box-shadow:0 1px 4px rgba(61,35,114,0.05);">
+        <h2 style="font-size:.78rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+                   color:#9490b0; margin-bottom:1rem;">Ejecutivos de Pricing</h2>
+        @forelse($stats['ejecutivos_pricing'] as $ej)
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:.6rem 0;
+                    border-bottom:1px solid rgba(61,35,114,0.05);">
+            <div style="display:flex; align-items:center; gap:.65rem;">
+                <div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#cd3529,#3d2372);
+                             display:flex; align-items:center; justify-content:center; color:white; font-size:.7rem; font-weight:700; flex-shrink:0;">
+                    {{ strtoupper(substr($ej['name'], 0, 1)) }}
+                </div>
+                <span style="font-size:.875rem; font-weight:500; color:#1f103b;">{{ $ej['name'] }}</span>
+            </div>
+            <div style="display:flex; gap:1rem;">
+                <div style="text-align:center;">
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:#3d2372; line-height:1;">{{ $ej['en_proceso'] }}</p>
+                    <p style="font-size:.65rem; color:#9490b0; font-weight:600; text-transform:uppercase; letter-spacing:.06em;">En proceso</p>
+                </div>
+                <div style="text-align:center;">
+                    <p style="font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:#059669; line-height:1;">{{ $ej['enviadas_mes'] }}</p>
+                    <p style="font-size:.65rem; color:#9490b0; font-weight:600; text-transform:uppercase; letter-spacing:.06em;">Enviadas (mes)</p>
+                </div>
+            </div>
+        </div>
+        @empty
+        <p style="color:#9490b0; font-size:.85rem;">No hay ejecutivos de pricing registrados.</p>
+        @endforelse
     </div>
 
     {{-- Estado de solicitudes --}}
@@ -173,7 +255,7 @@
                     </p>
                 </div>
                 <span style="font-family:monospace; font-size:.82rem; font-weight:700; color:#059669; flex-shrink:0;">
-                    ${{ number_format($coti->venta_total, 0) }}
+                    {{ $coti->moneda === 'USD' ? 'USD' : 'MXN' }} ${{ number_format($coti->venta_total, 0) }}
                 </span>
             </div>
             @empty
