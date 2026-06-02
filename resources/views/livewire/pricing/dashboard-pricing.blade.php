@@ -1,15 +1,31 @@
 <div>
 
     {{-- Encabezado --}}
-    <div style="margin-bottom:2rem;">
-        <p class="v-tag">Módulo Pricing</p>
-        <h1 style="font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:.04em;
-                   color:#3d2372; line-height:1.1;">
-            Panel de solicitudes
-        </h1>
-        <p style="font-size:.875rem; color:#9490b0; margin-top:.25rem;">
-            {{ $solicitudes->total() }} {{ $solicitudes->total() === 1 ? 'solicitud' : 'solicitudes' }} visibles según filtros actuales
-        </p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+        <div>
+            <p class="v-tag">Módulo Pricing</p>
+            <h1 style="font-family:'Bebas Neue',sans-serif; font-size:2.2rem; letter-spacing:.04em;
+                       color:#3d2372; line-height:1.1;">
+                Panel de solicitudes
+            </h1>
+            <p style="font-size:.875rem; color:#9490b0; margin-top:.25rem;">
+                {{ $solicitudes->total() }} {{ $solicitudes->total() === 1 ? 'solicitud' : 'solicitudes' }} visibles según filtros actuales
+            </p>
+        </div>
+
+        {{-- Recuadro TC --}}
+        <div style="background:linear-gradient(135deg,#1f103b,#3d2372); border-radius:10px;
+                    padding:.9rem 1.25rem; display:flex; flex-direction:column; align-items:flex-end; min-width:150px;">
+            <p style="font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+                       color:rgba(255,255,255,0.45); margin-bottom:.25rem;">USD / MXN</p>
+            <p style="font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:.04em;
+                       color:white; line-height:1;">
+                ${{ $tc ? number_format($tc->valor, 4) : '—' }}
+            </p>
+            <p style="font-size:.62rem; color:rgba(255,255,255,0.35); margin-top:.2rem;">
+                {{ $tc ? 'Banxico · ' . $tc->actualizado_en->format('d/m/Y') : 'Sin datos' }}
+            </p>
+        </div>
     </div>
 
     {{-- Stats --}}

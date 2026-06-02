@@ -30,6 +30,7 @@ class CotizadorLive extends Component
 
     // Cabecera
     public string $tipo_plantilla = 'MXN';
+    public string $moneda         = 'MXN'; // MXN | USD
     public int    $version        = 1;
     public float  $tc             = 0;
     public float  $margen_deseado = 0;
@@ -139,10 +140,14 @@ class CotizadorLive extends Component
             ->orderBy('version', 'desc')
             ->first();
 
+        // Autocargar TC del sistema (Banxico, actualizado cada 24h)
+        $this->tc = \App\Models\TipoCambio::vigente();
+
         if ($ultima) {
             $this->tipo_plantilla = $ultima->tipo_plantilla;
+            $this->moneda         = $ultima->moneda ?? $this->monedaDerivada($ultima->tipo_plantilla);
             $this->version        = $ultima->version;
-            $this->tc             = $ultima->tc ?? 0;
+            $this->tc             = $ultima->tc ?? $this->tc;
             $this->margen_deseado = $ultima->margen_deseado ?? 0;
             $this->costo_ope      = $ultima->costo_ope;
             $this->validez        = $ultima->validez ?? '15 días';
@@ -582,6 +587,7 @@ class CotizadorLive extends Component
                 [
                     'folio_coti'           => $folioCoti,
                     'tipo_plantilla'       => $this->tipo_plantilla,
+                    'moneda'               => $this->moneda,
                     'tc'                   => $this->tc ?: null,
                     'margen_deseado'       => $this->margen_deseado ?: null,
                     'costo_ope'            => $this->costo_ope,
@@ -773,5 +779,16 @@ class CotizadorLive extends Component
             $this->lineas[$i]['proveedor_id']     = $value;
             $this->lineas[$i]['proveedor_nombre'] = $proveedor->nombre;
         }
+    }
+
+    /**
+     * Deriva la moneda según el tipo de plantilla si no hay registro previo.
+     */
+    protected function monedaDerivada(string $tipo_plantilla): string
+    {
+        return match ($tipo_plantilla) {
+            'USD', 'LCL' => 'USD',
+            default      => 'MXN',
+        };
     }
 }

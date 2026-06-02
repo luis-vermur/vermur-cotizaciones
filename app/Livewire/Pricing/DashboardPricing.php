@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Solicitud;
 use App\Models\User;
+use App\Models\TipoCambio;
 
 class DashboardPricing extends Component
 {
@@ -56,7 +57,9 @@ class DashboardPricing extends Component
             'enviada'     => (int) ($rows['enviada'] ?? 0),
         ];
 
-        return view('livewire.pricing.dashboard-pricing', compact('solicitudes', 'equipoPricing', 'stats'))
+        $tc = TipoCambio::orderByDesc('actualizado_en')->first();
+
+        return view('livewire.pricing.dashboard-pricing', compact('solicitudes', 'equipoPricing', 'stats', 'tc'))
             ->layout('layouts.ventas');
     }
 }

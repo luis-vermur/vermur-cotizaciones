@@ -10,7 +10,7 @@ class Cotizacion extends Model
 
     protected $fillable = [
         'solicitud_id', 'creado_por', 'folio_coti',
-        'tipo_plantilla', 'version',
+        'tipo_plantilla', 'moneda', 'version',
         'tc', 'margen_deseado', 'costo_ope',
         'costo_total', 'profit_total', 'venta_total', 'margen_real',
         'comision_pct', 'comision_monto',
