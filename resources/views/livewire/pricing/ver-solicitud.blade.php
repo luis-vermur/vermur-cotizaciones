@@ -266,7 +266,7 @@
                 @php
                 $iconos = ['pdf'=>'📄','doc'=>'📝','docx'=>'📝','xls'=>'📊','xlsx'=>'📊','png'=>'🖼','jpg'=>'🖼','jpeg'=>'🖼','heic'=>'🖼'];
                 @endphp
-                <a href="{{ Storage::url($adjunto->ruta) }}" target="_blank"
+                <a href="{{ Storage::disk('public')->url($adjunto->ruta) }}" target="_blank"
                     style="display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem;
                        background:#f8f7fc; border-radius:8px; border:1px solid rgba(61,35,114,0.1);
                        text-decoration:none; transition:border-color .2s, background .2s;"
@@ -627,7 +627,7 @@
         <div class="v-section-header">PDF de cotización</div>
         <div style="display:flex; flex-direction:column; gap:.5rem;">
             @foreach($pdfsCotizacion as $adj)
-            <a href="{{ Storage::url($adj->ruta) }}" target="_blank"
+            <a href="{{ Storage::disk('public')->url($adj->ruta) }}" target="_blank"
                 style="display:flex; align-items:center; gap:.75rem; padding:.75rem 1rem;
                        background:#f0ecf8; border-radius:8px; border:1px solid rgba(61,35,114,0.15);
                        text-decoration:none; transition:border-color .2s, background .2s;"

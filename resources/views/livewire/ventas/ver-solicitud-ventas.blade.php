@@ -108,7 +108,7 @@
                     <p class="text-xs font-medium mb-2" style="color:#3d1a8e;">📄 PDF de cotización</p>
                     <div class="flex flex-col gap-2">
                         @foreach($pdfsCoti as $pdf)
-                        <a href="{{ Storage::url($pdf->ruta) }}" target="_blank"
+                        <a href="{{ Storage::disk('public')->url($pdf->ruta) }}" target="_blank"
                             class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                             style="background-color:#ede9fe; color:#3d1a8e; text-decoration:none;"
                             onmouseover="this.style.background='#ddd6fe';"
@@ -138,7 +138,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             @foreach($adjuntosSolicitud as $adjunto)
             @php $iconos = ['pdf'=>'📄','doc'=>'📝','docx'=>'📝','xls'=>'📊','xlsx'=>'📊','png'=>'🖼','jpg'=>'🖼','jpeg'=>'🖼']; @endphp
-            <a href="{{ Storage::url($adjunto->ruta) }}" target="_blank"
+            <a href="{{ Storage::disk('public')->url($adjunto->ruta) }}" target="_blank"
                 class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200
                        hover:border-purple-300 hover:bg-purple-50 transition-colors group">
                 <span class="text-2xl">{{ $iconos[strtolower($adjunto->tipo ?? '')] ?? '📎' }}</span>
