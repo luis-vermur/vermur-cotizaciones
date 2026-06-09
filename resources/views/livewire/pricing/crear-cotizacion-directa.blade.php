@@ -25,13 +25,30 @@
                     Cliente <span class="text-red-500">*</span>
                 </label>
                 <div style="display:flex; gap:.5rem; align-items:flex-start;">
-                    <select wire:model.live="cliente_id"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <option value="">— Seleccionar cliente —</option>
-                        @foreach($clientes as $c)
-                        <option value="{{ $c->id }}">{{ $c->nombre }}</option>
-                        @endforeach
-                    </select>
+                    {{-- Autocomplete cliente --}}
+                    <div style="position:relative; flex:1;">
+                        <input wire:model.live="clienteBusqueda" type="text"
+                            autocomplete="off"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            placeholder="Buscar cliente por nombre...">
+                        @if($mostrarDropdownCliente && $clientesFiltrados->count())
+                        <div style="position:absolute; z-index:50; width:100%; background:white;
+                                    border:1px solid rgba(61,35,114,0.2); border-radius:8px;
+                                    box-shadow:0 4px 16px rgba(61,35,114,0.12); margin-top:2px; max-height:200px; overflow-y:auto;">
+                            @foreach($clientesFiltrados as $c)
+                            <div wire:click="seleccionarCliente({{ $c->id }}, '{{ addslashes($c->nombre) }}', {{ $c->dias_credito }})"
+                                 style="padding:.6rem 1rem; cursor:pointer; font-size:.875rem; border-bottom:1px solid rgba(61,35,114,0.06);"
+                                 onmouseover="this.style.background='#f0ecf8';"
+                                 onmouseout="this.style.background='';">
+                                <span style="font-weight:600; color:#1f103b;">{{ $c->nombre }}</span>
+                                @if($c->dias_credito > 0)
+                                <span style="font-size:.75rem; color:#9490b0; margin-left:.5rem;">{{ $c->dias_credito }} días crédito</span>
+                                @endif
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
                     <button type="button" wire:click="$toggle('mostrarCrearCliente')"
                         style="white-space:nowrap; padding:.45rem 1rem; background:#3d2372; color:white;
                                border:none; border-radius:.375rem; font-size:.8rem; font-weight:600; cursor:pointer;"

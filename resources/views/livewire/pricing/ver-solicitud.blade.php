@@ -287,6 +287,160 @@
     </div>
     @endif
 
+    {{-- Detalle completo del embarque (siempre visible si hay datos) --}}
+    @php
+    $fcl_flags = array_keys(array_filter([
+        'Food Grade'      => $solicitud->fcl_food_grade,
+        'Reforzado'       => $solicitud->fcl_reforzado,
+        'Sobredimensión'  => $solicitud->fcl_sobredimension,
+        'Enlonado'        => $solicitud->fcl_enlonado,
+        'Atmósfera ctrl.' => $solicitud->fcl_atmos_controlada,
+    ]));
+    $hayDetalle = $solicitud->volumen_operacion || $solicitud->fcl_contenedor || $solicitud->fcl_peso
+        || $solicitud->fcl_reqs || count($fcl_flags)
+        || $solicitud->lcl_num_pallets || $solicitud->lcl_cubicaje_total
+        || $solicitud->ter_tipo || $solicitud->ter_mercancia || $solicitud->ter_num_pallets
+        || $solicitud->valor_factura || $solicitud->margen_profit;
+    @endphp
+    @if($hayDetalle)
+    <div class="vcard" style="padding:1.5rem;">
+        <div class="v-section-header">
+            Detalle del embarque
+            @if($solicitud->tipo_embarque && $solicitud->tipo_embarque !== 'ninguno')
+            <span style="font-size:.75rem; color:#9490b0; font-weight:400; text-transform:none; letter-spacing:0; margin-left:.5rem;">
+                · {{ $solicitud->tipo_embarque }}
+            </span>
+            @endif
+        </div>
+        <style>@media(min-width:768px){.emb-grid{grid-template-columns:repeat(4,1fr)!important;}}</style>
+        <div class="emb-grid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:1rem;">
+
+            {{-- Volumen / contenedores --}}
+            @if($solicitud->volumen_operacion)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">
+                    {{ $solicitud->tipo_embarque === 'FCL' ? 'Núm. contenedores' : 'Volumen de operación' }}
+                </p>
+                <p style="font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:#3d2372; line-height:1;">{{ $solicitud->volumen_operacion }}</p>
+            </div>
+            @endif
+
+            {{-- FCL: tipo contenedor --}}
+            @if($solicitud->fcl_contenedor)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Tipo de contenedor</p>
+                <p style="font-weight:700; color:#1f103b;">{{ $solicitud->fcl_contenedor }}</p>
+            </div>
+            @endif
+
+            {{-- FCL: peso --}}
+            @if($solicitud->fcl_peso)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Peso FCL</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->fcl_peso }} {{ $solicitud->fcl_peso_unidad }}</p>
+            </div>
+            @endif
+
+            {{-- LCL: pallets y cubicaje --}}
+            @if($solicitud->lcl_num_pallets)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Pallets (LCL)</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->lcl_num_pallets }}</p>
+            </div>
+            @endif
+            @if($solicitud->lcl_cubicaje_total)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Cubicaje total</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->lcl_cubicaje_total }} m³</p>
+            </div>
+            @endif
+            @if($solicitud->lcl_estibable)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Estibable</p>
+                <p style="font-weight:600; color:#059669;">✓ Sí</p>
+            </div>
+            @endif
+
+            {{-- Terrestre --}}
+            @if($solicitud->ter_tipo)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Tipo terrestre</p>
+                <p style="font-weight:700; color:#3d2372;">{{ $solicitud->ter_tipo }}@if($solicitud->ter_unidad) — {{ $solicitud->ter_unidad }}@endif</p>
+            </div>
+            @endif
+            @if($solicitud->ter_mercancia)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Mercancía</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->ter_mercancia }}</p>
+            </div>
+            @endif
+            @if($solicitud->ter_num_pallets)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Pallets</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->ter_num_pallets }}</p>
+            </div>
+            @endif
+            @if($solicitud->ter_peso)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Peso</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->ter_peso }} {{ $solicitud->ter_peso_unidad }}</p>
+            </div>
+            @endif
+            @if($solicitud->ter_medidas)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Medidas x pallet</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->ter_medidas }}</p>
+            </div>
+            @endif
+            @if($solicitud->ter_volumen)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Volumen</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->ter_volumen }} CBM</p>
+            </div>
+            @endif
+            @if($solicitud->ter_estibable)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Estibable</p>
+                <p style="font-weight:600; color:#059669;">✓ Sí</p>
+            </div>
+            @endif
+
+            {{-- Comercial --}}
+            @if($solicitud->valor_factura)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Valor de factura</p>
+                <p style="font-weight:600; color:#1f103b;">${{ number_format($solicitud->valor_factura, 2) }}</p>
+            </div>
+            @endif
+            @if($solicitud->margen_profit)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Margen deseado</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->margen_profit }}%</p>
+            </div>
+            @endif
+
+            {{-- FCL: reqs y flags --}}
+            @if($solicitud->fcl_reqs)
+            <div style="grid-column:1/-1;">
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.2rem;">Requerimientos especiales</p>
+                <p style="font-weight:500; color:#1f103b;">{{ $solicitud->fcl_reqs }}</p>
+            </div>
+            @endif
+            @if(count($fcl_flags))
+            <div style="grid-column:1/-1;">
+                <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#9490b0; margin-bottom:.4rem;">Características especiales</p>
+                <div style="display:flex; flex-wrap:wrap; gap:.4rem;">
+                    @foreach($fcl_flags as $f)
+                    <span style="padding:.2rem .65rem; background:#ede9fe; border-radius:999px; font-size:.78rem; font-weight:600; color:#3d2372;">✓ {{ $f }}</span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+        </div>
+    </div>
+    @endif
+
     {{-- Servicios --}}
     <div class="vcard" style="padding:1.5rem;">
         <div class="v-section-header">Servicios solicitados</div>
