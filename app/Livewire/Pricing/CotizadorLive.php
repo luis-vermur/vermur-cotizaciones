@@ -13,6 +13,7 @@ use App\Models\Adjunto;
 use App\Models\Proveedor;
 use App\Models\Comentario;
 use App\Services\CotizacionCalculator;
+use App\Notifications\CotizacionEntregadaNotification;
 
 class CotizadorLive extends Component
 {
@@ -733,6 +734,11 @@ class CotizadorLive extends Component
             'user_id'         => auth()->id(),
             'motivo'          => 'Cotización entregada a Ventas desde cotizador',
         ]);
+
+        // Notificar al usuario de ventas que creó la solicitud
+        try {
+            $solicitud->creadoPor?->notify(new CotizacionEntregadaNotification($solicitud));
+        } catch (\Throwable) {}
 
         $this->pdfEntrega    = null;
         $this->mostrarEntrega = false;

@@ -20,6 +20,10 @@ class CrearCotizacionDirecta extends Component
     public string $nuevoClienteNombre  = '';
     public int    $nuevoClienteDias    = 30;
 
+    // Búsqueda cliente
+    public string $clienteBusqueda        = '';
+    public bool   $mostrarDropdownCliente = false;
+
     // Info general
     public $tipo_operacion  = '';
     public $tipo_transporte = '';
@@ -83,6 +87,20 @@ class CrearCotizacionDirecta extends Component
             'tipo_mercancia.required'  => 'Indica el tipo de mercancía.',
             'cliente_nombre.required'  => 'El nombre del cliente es obligatorio.',
         ];
+    }
+
+    public function updatedClienteBusqueda()
+    {
+        $this->mostrarDropdownCliente = strlen($this->clienteBusqueda) >= 1;
+    }
+
+    public function seleccionarCliente($id, $nombre, $dias)
+    {
+        $this->cliente_id             = $id;
+        $this->cliente_nombre         = $nombre;
+        $this->dias_credito           = $dias;
+        $this->clienteBusqueda        = $nombre;
+        $this->mostrarDropdownCliente = false;
     }
 
     public function updatedTipoTransporte()
@@ -184,9 +202,14 @@ class CrearCotizacionDirecta extends Component
 
     public function render()
     {
+        $clientesFiltrados = $this->clienteBusqueda
+            ? Cliente::where('nombre', 'like', '%' . $this->clienteBusqueda . '%')->orderBy('nombre')->limit(10)->get()
+            : collect();
+
         return view('livewire.pricing.crear-cotizacion-directa', [
-            'clientes'       => Cliente::orderBy('nombre')->get(),
-            'equipoPricing'  => User::where('rol', 'pricing')->where('activo', true)->get(),
+            'clientes'          => Cliente::orderBy('nombre')->get(),
+            'clientesFiltrados' => $clientesFiltrados,
+            'equipoPricing'     => User::where('rol', 'pricing')->where('activo', true)->get(),
         ])->layout('layouts.ventas');
     }
 }

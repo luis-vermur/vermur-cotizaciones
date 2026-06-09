@@ -29,6 +29,10 @@ class CrearSolicitud extends Component
     public string $nuevoClienteNombre   = '';
     public int    $nuevoClienteDias     = 30;
 
+    // Búsqueda de cliente
+    public string $clienteBusqueda      = '';
+    public bool   $mostrarDropdownCliente = false;
+
 
     // Info general
     public $cliente_id       = '';
@@ -89,6 +93,20 @@ class CrearSolicitud extends Component
     public $ter_medidas     = '';
     public $ter_volumen     = '';
     public $ter_estibable   = false;
+
+    public function updatedClienteBusqueda()
+    {
+        $this->mostrarDropdownCliente = strlen($this->clienteBusqueda) >= 1;
+    }
+
+    public function seleccionarCliente($id, $nombre, $dias)
+    {
+        $this->cliente_id             = $id;
+        $this->cliente_nombre         = $nombre;
+        $this->dias_credito           = $dias;
+        $this->clienteBusqueda        = $nombre;
+        $this->mostrarDropdownCliente = false;
+    }
 
     public function updatedTipoTransporte()
     {
@@ -359,9 +377,14 @@ class CrearSolicitud extends Component
 
     public function render()
     {
+        $clientesFiltrados = $this->clienteBusqueda
+            ? Cliente::where('nombre', 'like', '%' . $this->clienteBusqueda . '%')->orderBy('nombre')->limit(10)->get()
+            : collect();
+
         return view('livewire.ventas.crear-solicitud', [
-            'clientes'        => Cliente::orderBy('nombre')->get(),
-            'equipoPricing'   => User::where('rol', 'pricing')->where('activo', true)->get(),
+            'clientes'          => Cliente::orderBy('nombre')->get(),
+            'clientesFiltrados' => $clientesFiltrados,
+            'equipoPricing'     => User::where('rol', 'pricing')->where('activo', true)->get(),
         ])->layout('layouts.ventas');
     }
 }
