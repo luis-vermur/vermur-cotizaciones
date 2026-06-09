@@ -247,6 +247,13 @@ class CotizadorLive extends Component
             }
         }
 
+        // Castear todos los valores numéricos para evitar TypeError int+string
+        foreach ($this->lineas as $i => $linea) {
+            $this->lineas[$i]['costo']  = floatval($linea['costo'] ?? 0);
+            $this->lineas[$i]['profit'] = floatval($linea['profit'] ?? 0);
+            $this->lineas[$i]['venta']  = floatval($linea['venta'] ?? 0);
+        }
+
         $this->recalcularTodo();
     }
 

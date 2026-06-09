@@ -661,11 +661,11 @@
                     onmouseover="this.querySelector('.adj-actions').style.opacity='1';"
                     onmouseout="this.querySelector('.adj-actions').style.opacity='0';">
                     @if($esImagen)
-                    <img src="{{ Storage::url($adj->ruta) }}" alt="{{ $adj->nombre_archivo }}"
+                    <img src="{{ Storage::disk('public')->url($adj->ruta) }}" alt="{{ $adj->nombre_archivo }}"
                         style="width:100%; aspect-ratio:1; object-fit:cover; display:block; cursor:zoom-in;"
-                        @click="lightboxOpen = true; lightboxSrc = '{{ Storage::url($adj->ruta) }}'; lightboxName = '{{ $adj->nombre_archivo }}'">
+                        @click="lightboxOpen = true; lightboxSrc = '{{ Storage::disk('public')->url($adj->ruta) }}'; lightboxName = '{{ $adj->nombre_archivo }}'">
                     @else
-                    <a href="{{ Storage::url($adj->ruta) }}" target="_blank"
+                    <a href="{{ Storage::disk('public')->url($adj->ruta) }}" target="_blank"
                         style="display:flex; flex-direction:column; align-items:center; justify-content:center;
                            aspect-ratio:1; text-decoration:none;">
                         <span style="font-size:2rem; margin-bottom:.3rem;">📄</span>
