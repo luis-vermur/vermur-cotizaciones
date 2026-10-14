@@ -68,6 +68,60 @@
     </div>
     @endif
 
+    {{-- Ruta y direcciones --}}
+    @php
+    $cot_hayRuta = $solicitud->incoterm || $solicitud->pol_aol || $solicitud->pod_asd
+        || $solicitud->recoleccion || $solicitud->entrega
+        || $solicitud->dir_recoleccion || $solicitud->dir_entrega;
+    @endphp
+    @if($cot_hayRuta)
+    <div class="vcard" style="padding:1.25rem 1.5rem;">
+        <div class="v-section-header">Ruta y direcciones</div>
+        <style>@media(min-width:768px){.cot-ruta-grid{grid-template-columns:repeat(3,1fr)!important;}}</style>
+        <div class="cot-ruta-grid" style="display:grid; grid-template-columns:1fr; gap:1rem;">
+
+            @if($solicitud->incoterm)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; color:#9490b0; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25rem;">Incoterm</p>
+                <p style="font-weight:700; color:#3d2372; font-size:.95rem;">{{ $solicitud->incoterm }}</p>
+            </div>
+            @endif
+
+            @if($solicitud->pol_aol)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; color:#9490b0; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25rem;">Origen POL/AOL</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->pol_aol }}</p>
+            </div>
+            @endif
+
+            @if($solicitud->pod_asd)
+            <div>
+                <p style="font-size:.72rem; font-weight:600; color:#9490b0; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25rem;">Destino POD/ASD</p>
+                <p style="font-weight:600; color:#1f103b;">{{ $solicitud->pod_asd }}</p>
+            </div>
+            @endif
+
+            @foreach([
+            ['activo'=>$solicitud->recoleccion, 'dir'=>$solicitud->dir_recoleccion, 'label'=>'Dirección de recolección'],
+            ['activo'=>$solicitud->entrega, 'dir'=>$solicitud->dir_entrega, 'label'=>'Dirección de entrega'],
+            ] as $d)
+            @if($d['activo'] || $d['dir'])
+            <div style="grid-column:1/-1; background:#f8f7fc; border:1px solid rgba(61,35,114,0.08);
+                        border-radius:8px; padding:.7rem .85rem;">
+                <p style="font-size:.72rem; font-weight:600; color:#9490b0; letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25rem;">{{ $d['label'] }}</p>
+                @if($d['dir'])
+                <p style="font-weight:600; color:#1f103b; font-size:.875rem; word-break:break-word;">{{ $d['dir'] }}</p>
+                @else
+                <p style="font-size:.82rem; font-weight:600; color:#b45309;">⚠ Servicio solicitado sin dirección capturada</p>
+                @endif
+            </div>
+            @endif
+            @endforeach
+
+        </div>
+    </div>
+    @endif
+
     {{-- Detalle del embarque --}}
     @if($hayDetalleCot)
     <div class="vcard" style="padding:1.25rem 1.5rem;">

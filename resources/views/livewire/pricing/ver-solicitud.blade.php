@@ -472,6 +472,33 @@
                 </div>
                 @endforeach
             </div>
+
+            {{-- Direcciones de recolección y entrega --}}
+            @if($solicitud->recoleccion || $solicitud->entrega || $solicitud->dir_recoleccion || $solicitud->dir_entrega)
+            <div style="grid-column:1/-1; margin-top:1rem; padding-top:1rem;
+                        border-top:1px solid rgba(61,35,114,0.1); display:grid; gap:.75rem;">
+                @foreach([
+                ['activo'=>$solicitud->recoleccion, 'dir'=>$solicitud->dir_recoleccion, 'label'=>'Dirección de recolección', 'icono'=>'📍'],
+                ['activo'=>$solicitud->entrega, 'dir'=>$solicitud->dir_entrega, 'label'=>'Dirección de entrega', 'icono'=>'🏁'],
+                ] as $d)
+                @if($d['activo'] || $d['dir'])
+                <div style="display:flex; gap:.6rem; align-items:flex-start; background:#f8f7fc;
+                            border:1px solid rgba(61,35,114,0.08); border-radius:8px; padding:.7rem .85rem;">
+                    <span style="font-size:.9rem; line-height:1.35;">{{ $d['icono'] }}</span>
+                    <div style="min-width:0;">
+                        <p style="font-size:.72rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+                                  color:#9490b0; margin-bottom:.2rem;">{{ $d['label'] }}</p>
+                        @if($d['dir'])
+                        <p style="font-weight:600; color:#1f103b; font-size:.875rem; word-break:break-word;">{{ $d['dir'] }}</p>
+                        @else
+                        <p style="font-size:.82rem; font-weight:600; color:#b45309;">⚠ Servicio solicitado sin dirección capturada</p>
+                        @endif
+                    </div>
+                </div>
+                @endif
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 
