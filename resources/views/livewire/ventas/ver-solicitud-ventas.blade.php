@@ -194,6 +194,23 @@
                 <p class="font-medium text-gray-800">{{ $solicitud->pod_asd }}</p>
             </div>
             @endif
+
+            {{-- Direcciones de recolección y entrega --}}
+            @foreach([
+            ['activo'=>$solicitud->recoleccion, 'dir'=>$solicitud->dir_recoleccion, 'label'=>'Dirección de recolección'],
+            ['activo'=>$solicitud->entrega, 'dir'=>$solicitud->dir_entrega, 'label'=>'Dirección de entrega'],
+            ] as $d)
+            @if($d['activo'] || $d['dir'])
+            <div style="grid-column:1/-1;">
+                <p class="text-gray-400 text-xs uppercase tracking-wide mb-1">{{ $d['label'] }}</p>
+                @if($d['dir'])
+                <p class="font-medium text-gray-800" style="word-break:break-word;">{{ $d['dir'] }}</p>
+                @else
+                <p class="font-medium" style="color:#b45309; font-size:.82rem;">⚠ Servicio solicitado sin dirección capturada</p>
+                @endif
+            </div>
+            @endif
+            @endforeach
         </div>
     </div>
 
